@@ -55,4 +55,4 @@ def create_breed_folders_for_one_csv_file(csv_file_path, new_image_dir, old_imag
 create_breed_folders_for_one_csv_file(csv_file_path_train, new_train_dir, kaggle_train_dir)
 
 # execute for test data
-#create_breed_folders_for_one_csv_file(csv_file_path_test, new_test_dir, kaggle_test_dir)
+create_breed_folders_for_one_csv_file(csv_file_path_test, new_test_dir, kaggle_test_dir)
