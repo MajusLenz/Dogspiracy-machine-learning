@@ -219,5 +219,5 @@ breeds = [
     "Yorkie Yorkshire Terrier"
 ]
 
-def getBreeds():
+def get_breeds():
     return breeds

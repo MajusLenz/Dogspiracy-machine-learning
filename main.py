@@ -1,9 +1,9 @@
-from all_breeds_array_for_random_agent import getBreeds
+from all_breeds_array_for_random_agent import get_breeds
 from randomAgent import model
 
 def main():
-    breeds = getBreeds()
-    randomBreed = model(breeds)
-    print(randomBreed)
+    breeds = get_breeds()
+    random_breed = model(breeds)
+    print(random_breed)
 
 main()
