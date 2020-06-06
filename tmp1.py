@@ -1,5 +1,5 @@
 from all_breeds_array_for_random_agent import get_breeds
-from randomAgent import model
+from RandomAgent import model
 
 def main():
     breeds = get_breeds()
