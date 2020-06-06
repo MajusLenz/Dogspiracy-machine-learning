@@ -218,3 +218,6 @@ breeds = [
     "Xoloitzcuintle/Mexican Hairless",
     "Yorkie Yorkshire Terrier"
 ]
+
+def get_breeds():
+    return breeds

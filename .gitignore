@@ -2,6 +2,9 @@
 .vscode/
 .idea/
 
+# data
+/Dog_Breed_Recognition_Competition_Datasets/*
+
 # Vagrant
 .vagrant/
 
