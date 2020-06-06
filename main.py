@@ -1,4 +1,4 @@
-from dogBreeds import getBreeds
+from all_breeds_array_for_random_agent import getBreeds
 from randomAgent import model
 
 def main():
@@ -7,9 +7,3 @@ def main():
     print(randomBreed)
 
 main()
-
-
-
-
-
-
