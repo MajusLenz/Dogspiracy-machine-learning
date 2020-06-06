@@ -1,0 +1,219 @@
+breed,breed_id
+Affenpinscher,1
+Afghan Hound,2
+Airedale Terrier,3
+Akbash,4
+Akita,5
+Alaskan Malamute,6
+American Bulldog,7
+American Eskimo Dog,8
+American Hairless Terrier,9
+American Pit Bull Terrier,10
+American Staffordshire Terrier,11
+American Water Spaniel,12
+Anatolian Shepherd,13
+Australian Cattle Dog,14
+Australian Kelpie,15
+Australian Shepherd,16
+Australian Terrier,17
+Basenji,18
+Basset Griffon Vendeen,19
+Basset Hound,20
+Beagle,21
+Bearded Collie,22
+Beauceron,23
+Belgian Malinois,24
+Belgian Shepherd,25
+Bernese Mountain Dog,26
+Bichon Frise,27
+Black and Tan Coonhound,28
+Black Mouth Cur,29
+Bloodhound,30
+Blue Heeler,31
+Blue Lacy/Texas Lacy,32
+Bluetick Coonhound,33
+Border Collie,34
+Border Terrier,35
+Borzoi,36
+Boston Terrier,37
+Bouvier des Flandres,38
+Boxer,39
+Boykin Spaniel,40
+Brittany,41
+Brussels Griffon,42
+Bull Terrier,43
+Bulldog,44
+Bullmastiff,45
+Cairn Terrier,46
+Canaan Dog,47
+Cane Corso,48
+Cardigan Welsh Corgi,49
+Carolina Dog,50
+Catahoula Leopard Dog,51
+Cattle Dog,52
+Cavalier King Charles Spaniel,53
+Chesapeake Bay Retriever,54
+Chihuahua,55
+Chinese Crested,56
+Chinook,57
+Chow Chow,58
+Clumber Spaniel,59
+Cockapoo,60
+Cocker Spaniel,61
+Collie,62
+Coonhound,63
+Coonhound (Unknown Type),64
+Corgi,65
+Coton de Tulear,66
+Curly-Coated Retriever,67
+Dachshund,68
+Dalmatian,69
+Dandie Dinmont Terrier,70
+Doberman Pinscher,71
+Dogo Argentino,72
+Dogue de Bordeaux,73
+Dutch Shepherd,74
+English (Redtick) Coonhound,75
+English Bulldog,76
+English Mastiff,77
+English Pointer,78
+English Setter,79
+English Sheepdog,80
+English Shepherd,81
+English Springer Spaniel,82
+English Toy Spaniel,83
+Eskimo Spitz,84
+Feist,85
+Finnish Spitz,86
+Flat-Coated Retriever,87
+Fox Terrier (Smooth),88
+Fox Terrier (Toy),89
+Fox Terrier (Wirehaired),90
+Foxhound,91
+French Bulldog,92
+French Mastiff,93
+German Pinscher,94
+German Shepherd Dog,95
+German Shorthaired Pointer,96
+German Wirehaired Pointer,97
+Giant Schnauzer,98
+Glen of Imaal Terrier,99
+Golden Retriever,100
+Goldendoodle,101
+Gordon Setter,102
+Great Dane,103
+Great Pyrenees,104
+Greater Swiss Mountain Dog,105
+Greyhound,106
+Harrier,107
+Havanese,108
+Hound (Unknown Type),109
+Hovawart,110
+Husky,111
+Irish Setter,112
+Irish Terrier,113
+Irish Wolfhound,114
+Italian Greyhound,115
+Jack Russell Terrier,116
+Japanese Chin,117
+Jindo,118
+Kai Dog,119
+Keeshond,120
+King Charles Spaniel,121
+Labradoodle,122
+Labrador Retriever,123
+Lancashire Heeler,124
+Leonberger,125
+Lhasa Apso,126
+Maltese,127
+Manchester Terrier,128
+Maremma Sheepdog,129
+Mastiff,130
+Miniature Pinscher,131
+Miniature Poodle,132
+Miniature Schnauzer,133
+Mixed Breed (Large),134
+Mixed Breed (Medium),135
+Mixed Breed (Small),136
+Mountain Cur,137
+Munsterlander,138
+Neapolitan Mastiff,139
+Newfoundland,140
+Norfolk Terrier,141
+Norwegian Elkhound,142
+Norwich Terrier,143
+Nova Scotia Duck-Tolling Retriever,144
+Old English Sheepdog,145
+Otterhound,146
+Papillon,147
+Parson Russell Terrier,148
+Patterdale Terrier (Fell Terrier),149
+Pekingese,150
+Pembroke Welsh Corgi,151
+Petit Basset Griffon Vendeen,152
+Pharaoh Hound,153
+Pit Bull Terrier,154
+Plott Hound,155
+Podengo Portugueso,156
+Pointer,157
+Pomeranian,158
+Poodle (Miniature),159
+Poodle (Standard),160
+Poodle (Toy or Tea Cup),161
+Portuguese Water Dog,162
+Presa Canario,163
+Pug,164
+Rat Terrier,165
+Redbone Coonhound,166
+Redtick Coonhound,167
+Retriever (Unknown Type),168
+Rhodesian Ridgeback,169
+Rottweiler,170
+Saluki,171
+Samoyed,172
+Schipperke,173
+Schnauzer (Giant),174
+Schnauzer (Miniature),175
+Schnauzer (Standard),176
+"Scottie, Scottish Terrier",177
+Sealyham Terrier,178
+Setter (Unknown Type),179
+Shar Pei,180
+"Sheltie, Shetland Sheepdog",181
+Shepherd (Unknown Type),182
+Shiba Inu,183
+Shih Tzu,184
+Siberian Husky,185
+Silky Terrier,186
+Skye Terrier,187
+Smooth Fox Terrier,188
+Spaniel (Unknown Type),189
+"Spitz (Unknown Type, Large)",190
+"Spitz (Unknown Type, Medium)",191
+"Spitz (Unknown Type, Small)",192
+Springer Spaniel,193
+St. Bernard,194
+Staffordshire Bull Terrier,195
+Standard Poodle,196
+Standard Schnauzer,197
+Swedish Vallhund,198
+"Terrier (Unknown Type, Medium)",199
+"Terrier (Unknown Type, Small)",200
+Thai Ridgeback,201
+Tibetan Mastiff,202
+Tibetan Spaniel,203
+Tibetan Terrier,204
+Toy Fox Terrier,205
+Toy Poodle,206
+Treeing Walker Coonhound,207
+Vizsla,208
+Weimaraner,209
+Welsh Corgi,210
+Welsh Springer Spaniel,211
+"Westie, West Highland White Terrier",212
+Wheaten Terrier,213
+Whippet,214
+Wirehaired Fox Terrier,215
+Wirehaired Pointing Griffon,216
+Xoloitzcuintle/Mexican Hairless,217
+"Yorkie, Yorkshire Terrier",218
