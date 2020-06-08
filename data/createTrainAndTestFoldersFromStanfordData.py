@@ -54,6 +54,6 @@ for stanford_breed_folder in os.scandir(stanford_dir):
             destination = destination_folder + clean_breed_name + "/" + file_name
 
             copyfile(location_path, destination)
-            image_counter += 1
+            image_counter = image_counter +1
         except:
             traceback.print_exc()
