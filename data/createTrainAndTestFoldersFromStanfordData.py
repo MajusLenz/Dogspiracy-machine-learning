@@ -39,12 +39,12 @@ for stanford_breed_folder in os.scandir(stanford_dir):
     # iterate over all images inside a breed folder
     for image in os.scandir(stanford_dir + breed_name):
 
-        if image_counter > max_number_of_images_per_breed:
+        if image_counter >= max_number_of_images_per_breed:
             break
 
         destination_folder = new_train_dir
 
-        if image_counter > max_number_of_train_images_per_breed:
+        if image_counter >= max_number_of_train_images_per_breed:
             destination_folder = new_test_dir
 
         # copy image to new destination
