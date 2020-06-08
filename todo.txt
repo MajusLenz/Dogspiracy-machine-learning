@@ -1,0 +1,6 @@
+Alina, woher die infos Bath_Size etc.?
+
+besser config file mit hyperparametern machen, statt die verteilt im code haben?
+
+
+TODO: crop, noise etc.?
