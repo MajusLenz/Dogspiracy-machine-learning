@@ -38,6 +38,9 @@ def create_breed_folders_for_one_csv_file(csv_file_path, new_image_dir, old_imag
                 breed = breed + second_value
             breed = breed.replace('"', '')
 
+            # react to possible slashes in breed names
+            breed = breed.replace('/', ' aka ')
+
             create_folder_if_not_exists(new_image_dir + "/" + breed)
 
             # copy image to new dir
@@ -49,6 +52,8 @@ def create_breed_folders_for_one_csv_file(csv_file_path, new_image_dir, old_imag
                 copyfile(file_path, destination)
             except FileNotFoundError:
                 pass
+
+            breed = None
 
 
 # execute for training data

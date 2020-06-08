@@ -128,3 +128,4 @@ venv.bak/
 dmypy.json
 /data/images/
 /data/kaggle/images/
+/data/stanford/images/
