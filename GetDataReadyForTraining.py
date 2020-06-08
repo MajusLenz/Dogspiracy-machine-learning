@@ -89,7 +89,7 @@ image_batch, label_batch = next(iter(train_ds))
 
 
 def show_batch(image_batch, label_batch):
-    plt.figure(figsize=(20, 20))
+    plt.figure(figsize=(15, 15))
     for n in range(25):
         ax = plt.subplot(5, 5, n + 1)
         plt.imshow(image_batch[n])
