@@ -1,4 +1,4 @@
-breeds = [
+all_breeds = [
     "Affenpinscher",
     "Afghan Hound",
     "Airedale Terrier",
@@ -220,4 +220,4 @@ breeds = [
 ]
 
 def get_breeds():
-    return breeds
+    return all_breeds

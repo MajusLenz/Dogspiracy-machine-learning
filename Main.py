@@ -1,9 +1,13 @@
-from all_breeds_array_for_random_agent import get_breeds
-from RandomAgent import model
+from allBreedsArray import get_breeds
+from RandomAgent import RandomAgent
+
 
 def main():
     breeds = get_breeds()
-    random_breed = model(breeds)
+    random_agent = RandomAgent(breeds)
+    random_breed = random_agent.sample()
     print(random_breed)
 
-main()
+
+if __name__ == "__main__":
+    main()
