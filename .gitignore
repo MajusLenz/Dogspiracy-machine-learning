@@ -129,3 +129,6 @@ dmypy.json
 /data/images/
 /data/kaggle/images/
 /data/stanford/images/
+/data/images/
+/data/images/test/
+/data/images/train/
