@@ -1,5 +1,9 @@
-import tensorflow as tf
+# This script reads images from the data folders, prepossesses the data with cropping, resizing, noising and rotation.
+# it than creates and returns batches of key-value-pairs from the processed images with their corresponding labels
 
+# TODO crop, resize, noise, rotation, etc.
+
+import tensorflow as tf
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 import numpy as np
