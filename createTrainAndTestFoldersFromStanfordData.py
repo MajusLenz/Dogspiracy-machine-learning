@@ -1,20 +1,19 @@
+# Run me one time after you moved the stanford image folders in the directory that is set in "stanford_dir",
+# to create the train and test folder.
+
 import os
 import re
 import traceback
 from shutil import copyfile
+import config as cfg
 
-# this info comes from the dataset.
-# To ensure that every breed has the same number of images to train and to test,
-# this is set to the number of images of the breed with the fewest images.
-max_number_of_images_per_breed = 148
-# can be changed as needed.
-max_number_of_train_images_per_breed = 118  # 80/20 Ratio
+# see config.py
+max_number_of_images_per_breed = cfg.max_number_of_images_per_breed
+max_number_of_train_images_per_breed = cfg.max_number_of_train_images_per_breed
 max_number_of_test_images_per_breed = max_number_of_images_per_breed - max_number_of_train_images_per_breed
-
-# data destinations
-new_train_dir = "images/train/"
-new_test_dir = "images/test/"
-stanford_dir = "stanford/images/"
+train_dir = cfg.train_dir
+test_dir = cfg.test_dir
+stanford_dir = cfg.stanford_dir
 
 
 def create_folder_if_not_exists(folder_name):
@@ -33,8 +32,8 @@ for stanford_breed_folder in os.scandir(stanford_dir):
     breed_name = stanford_breed_folder.name
     clean_breed_name = delete_every_string_character_before_delimiter(breed_name)
 
-    create_folder_if_not_exists(new_train_dir + clean_breed_name)
-    create_folder_if_not_exists(new_test_dir + clean_breed_name)
+    create_folder_if_not_exists(train_dir + clean_breed_name)
+    create_folder_if_not_exists(test_dir + clean_breed_name)
 
     # iterate over all images inside a breed folder
     for image in os.scandir(stanford_dir + breed_name):
@@ -42,10 +41,10 @@ for stanford_breed_folder in os.scandir(stanford_dir):
         if image_counter >= max_number_of_images_per_breed:
             break
 
-        destination_folder = new_train_dir
+        destination_folder = train_dir
 
         if image_counter >= max_number_of_train_images_per_breed:
-            destination_folder = new_test_dir
+            destination_folder = test_dir
 
         # copy image to new destination
         try:

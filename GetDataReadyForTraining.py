@@ -6,21 +6,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import pathlib
+import config as cfg
+
 
 # set directory of training images
-# data_dir = "Dog_Breed_Recognition_Competition_Datasets/Dog_Breed_Training_Images"
-data_dir = "data/images/train"
+train_dir = cfg.train_dir
 
-data_dir = pathlib.Path(data_dir)
+data_dir = pathlib.Path(train_dir)
 
 # get possible breed names
 CLASS_NAMES = np.array([item.name for item in data_dir.glob('*')])
 # print(CLASS_NAMES)
 
 # define parameters
-BATCH_SIZE = 32
-IMG_HEIGHT = 224
-IMG_WIDTH = 224
+BATCH_SIZE = cfg.batch_size
+IMG_HEIGHT = cfg.img_height
+IMG_WIDTH = cfg.img_width
 
 # create dataset of file paths
 list_ds = tf.data.Dataset.list_files(str(data_dir / '*/*.jpg'))
