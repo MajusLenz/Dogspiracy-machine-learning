@@ -3,6 +3,7 @@
 
 # TODO crop, resize, noise, rotation, etc.
 from datetime import datetime
+import platform
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
@@ -151,7 +152,11 @@ model_new.summary()
 train_image_count = len(list(train_data_dir.glob('*/*.jpg')))
 test_image_count = len(list(test_data_dir.glob('*/*.jpg')))
 
-logdir = "./logs/scalars/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+logdir_first_part = "./logs/scalars/"
+if platform.system() == "Windows":
+    logdir_first_part = "logs/scalars/"
+
+logdir = logdir_first_part + datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
 
 STEPS_PER_EPOCH = np.ceil(train_image_count / BATCH_SIZE)
