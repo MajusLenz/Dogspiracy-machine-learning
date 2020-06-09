@@ -15,4 +15,4 @@ img_height = 224
 img_width = 224
 
 # LEARNING HYPER PARAMETERS:
-batch_size = 32
+batch_size = 16  # should be equal to the first param of the first model layer [ Conv2D(16, ...) ] (???)
