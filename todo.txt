@@ -11,3 +11,8 @@ define loss function
 
 
 README hübsch machen
+
+
+GPU nutzen?
+
+

@@ -64,21 +64,27 @@ def decode_img(img):
 
 
 def process_path(file_path):
-    label = get_label(file_path)
+    this_label = get_label(file_path)
     # load the raw data from the file as a string
     img = tf.io.read_file(file_path)
     img = decode_img(img)
-    return img, label
+    return img, this_label
 
+
+num_parallel_calls_param = AUTOTUNE
+
+# fix nasty bug, that occurs in older Windows Version if you try to parallelly process multiple images
+if platform.system() == "Windows":
+    num_parallel_calls_param = None
 
 # Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
-train_labeled_ds = train_list_ds.map(process_path, num_parallel_calls=AUTOTUNE)
+train_labeled_ds = train_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
 for image, label in train_labeled_ds.take(1):
     print("Image shape: ", image.numpy().shape)
     print("Label: ", label.numpy())
 
 # Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
-test_labeled_ds = test_list_ds.map(process_path, num_parallel_calls=AUTOTUNE)
+test_labeled_ds = test_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
 for image, label in test_labeled_ds.take(1):
     print("Image shape: ", image.numpy().shape)
     print("Label: ", label.numpy())
@@ -153,10 +159,26 @@ train_image_count = len(list(train_data_dir.glob('*/*.jpg')))
 test_image_count = len(list(test_data_dir.glob('*/*.jpg')))
 
 logdir_first_part = "./logs/scalars/"
+now_time = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+# fix very nasty Windows OS bug, that TF runs in, if those folders do not exist before TensorBoard tries to create them
 if platform.system() == "Windows":
     logdir_first_part = "logs/scalars/"
+    time_folder_path = logdir_first_part + now_time
+    deeper_folder_path = time_folder_path + "/train"
+    deeper_folder_path2 = deeper_folder_path + "/plugins"
+    deeper_folder_path3 = deeper_folder_path2 + "/profile"
 
-logdir = logdir_first_part + datetime.now().strftime("%Y%m%d-%H%M%S")
+    def create_folder_if_not_exists(folder_name):
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+
+    create_folder_if_not_exists(time_folder_path)
+    create_folder_if_not_exists(deeper_folder_path)
+    create_folder_if_not_exists(deeper_folder_path2)
+    create_folder_if_not_exists(deeper_folder_path3)
+
+logdir = logdir_first_part + now_time
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
 
 STEPS_PER_EPOCH = np.ceil(train_image_count / BATCH_SIZE)
@@ -167,7 +189,7 @@ model_new.fit(
     steps_per_epoch=STEPS_PER_EPOCH,
     epochs=1,
     callbacks=[tensorboard_callback],
-    validation_steps= val_steps,
+    validation_steps=val_steps,
     validation_data=test_ds,
     validation_freq=10
 )
