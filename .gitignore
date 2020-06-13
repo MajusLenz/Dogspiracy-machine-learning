@@ -137,3 +137,4 @@ dmypy.json
 /data/images/test/
 /data/images/train/
 /data/flower_photos/
+/data/flower_photos_few/

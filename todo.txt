@@ -1,4 +1,4 @@
-crop, noise etc.
+cropping, resizing, noising and rotation ?
 
 
 GPU nutzen?

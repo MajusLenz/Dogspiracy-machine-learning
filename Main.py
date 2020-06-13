@@ -1,7 +1,7 @@
-# This script reads images from the data folders, prepossesses the data with cropping, resizing, noising and rotation.
-# it than creates and returns batches of key-value-pairs from the processed images with their corresponding labels
+# This script reads images from the data folders, prepossesses the data.
+# it than creates and returns batches of key-value-pairs from the processed images with their corresponding breed-labels
+# than it trains a model via tensorflow that learns to classify the images into dog-breeds.
 
-# TODO crop, resize, noise, rotation, etc.
 from datetime import datetime
 import platform
 
