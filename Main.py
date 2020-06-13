@@ -120,6 +120,8 @@ test_ds = prepare_for_training(test_labeled_ds)
 
 # set variables for plot (either train or test dataset)
 image_batch, label_batch = next(iter(train_ds))
+
+
 # image_batch, label_batch = next(iter(test_ds))
 
 
@@ -133,6 +135,7 @@ def show_batch(image_batch, label_batch):
         plt.axis('off')
 
     return plt.show()
+
 
 # TODO ADD more Layers: Conv2D, MaxPooling2D, Dropout
 # Dropout(0.2),
@@ -158,12 +161,12 @@ model_new = Sequential([
 model_new.compile(
     optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
     loss=tf.keras.losses.CategoricalCrossentropy(
-    from_logits=False,
-    label_smoothing=0,
-    reduction="auto",
-    name="categorical_crossentropy",
+        from_logits=False,
+        label_smoothing=0,
+        reduction="auto",
+        name="categorical_crossentropy",
     ),
-   metrics=['categorical_accuracy', 'accuracy'])
+    metrics=['categorical_accuracy', 'accuracy'])
 
 model_new.summary()
 

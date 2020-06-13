@@ -1,15 +1,4 @@
 crop, noise etc.
 
 
-README hübsch machen
-
-
 GPU nutzen?
-
-
-labels fixen?
-
-
-script umbenennen bzw. auseinanderpflücken
-
-

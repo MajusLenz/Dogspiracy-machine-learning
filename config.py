@@ -2,7 +2,7 @@
 
 # directories where the data is located at
 stanford_dir = "data/stanford/images/"
-train_dir = "data/images/train/"
+train_dir = "data/images/train_few/"
 test_dir = "data/images/test/"
 
 # this info comes from the dataset.
