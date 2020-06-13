@@ -131,33 +131,36 @@ def show_batch(image_batch, label_batch):
 
     return plt.show()
 
-
-# show results
-# show_batch(image_batch.numpy(), label_batch.numpy())
+# TODO ADD more Layers: Conv2D, MaxPooling2D, Dropout
+# Dropout(0.2),
+# Conv2D(32, 3, padding='same', activation='relu'),
+# MaxPooling2D(),
+# Conv2D(64, 3, padding='same', activation='relu'),
+# MaxPooling2D(),
+# Dropout(0.2),
 
 model_new = Sequential([
     Conv2D(16, 3, padding='same', activation='relu',
            input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
     MaxPooling2D(),
-    Dropout(0.2),
-    Conv2D(32, 3, padding='same', activation='relu'),
-    MaxPooling2D(),
-    Conv2D(64, 3, padding='same', activation='relu'),
-    MaxPooling2D(),
-    Dropout(0.2),
     Flatten(),
     Dense(512, activation='relu'),
-    Dense(1)
+    Dense(3, activation='softmax')
 ])
 
-model_new.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
-              loss=tf.keras.losses.CategoricalCrossentropy(
+# CategoricalCrossentropy: Computes the crossentropy loss between the labels and predictions.
+# Use this crossentropy loss function when there are two or more label classes.
+# We expect labels to be provided in a one_hot representation.
+# categorical_accuracy: Calculates how often predictions matches one-hot labels.
+model_new.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
+    loss=tf.keras.losses.CategoricalCrossentropy(
     from_logits=False,
     label_smoothing=0,
     reduction="auto",
     name="categorical_crossentropy",
-),
-              metrics=['categorical_accuracy'])
+    ),
+   metrics=['categorical_accuracy', 'accuracy'])
 
 model_new.summary()
 
