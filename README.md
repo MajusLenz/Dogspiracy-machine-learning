@@ -32,7 +32,7 @@ Run file "Main.py" to train the sample data.
 A sample of the dataset can be found in the folder _data/images_
 
 To use the entire dataset visit http://vision.stanford.edu/aditya86/ImageNetDogs/ and download the dataset.
-Please note: Only the image-dataset is required!
+Please note: Only the "Images (757MB)" are required as the dataset!
 
 Once you downloaded the images, place them in the folder _data/stanford/images_ and run this file:
 [createTrainAndTestFoldersFromStanfordData.py](_createTrainAndTestFoldersFromStanfordData.py_)
