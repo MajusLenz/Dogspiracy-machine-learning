@@ -14,6 +14,15 @@ Please add the following packages:
 
 Make sure to have Python 3.7 installed.
 
+## Data Set 
+We decided to not use the following dataset, because of the quality of the data.
+~~https://www.kaggle.com/malhotra1432/dog-breed-prediction-competition/data?~~
+
+To use the entire dataset visit http://vision.stanford.edu/aditya86/ImageNetDogs/ and download the dataset.
+Please note: Only the image-dataset is required!
+
+Once you downloaded the images, place them in the folder _stanford/images_ and run this file:
+[createTrainAndTestFoldersFromStanfordData.py](_createTrainAndTestFoldersFromStanfordData.py_)
 
 ## Setup in PyCharm
 
@@ -27,11 +36,3 @@ Open Interpreter Settings and add Anaconda Interpreter.
 
 Run file "GetDataReadyForTraining.py" to train the sample data.
 
-## Data Set 
-~~https://www.kaggle.com/malhotra1432/dog-breed-prediction-competition/data?~~
-
-To use the entire dataset visit http://vision.stanford.edu/aditya86/ImageNetDogs/ and download the dataset.
-Please note: Only the image-dataset is required!
-
-Once you downloaded the images, place them in the folder _stanford/images_ and run this file:
-[createTrainAndTestFoldersFromStanfordData.py](_createTrainAndTestFoldersFromStanfordData.py_)
