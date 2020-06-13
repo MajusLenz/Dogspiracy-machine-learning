@@ -17,3 +17,8 @@ GPU nutzen?
 
 
 labels fixen?
+
+
+script umbenennen bzw. auseinanderpflücken
+
+
