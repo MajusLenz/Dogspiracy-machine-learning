@@ -31,6 +31,8 @@ test_data_dir = pathlib.Path(test_data_dir)
 CLASS_NAMES = np.array([item.name for item in test_data_dir.glob('*')])
 print('breed names: ', CLASS_NAMES)
 
+NUMER_OF_CLASSES = len(CLASS_NAMES)
+
 # define parameters
 BATCH_SIZE = cfg.batch_size
 IMG_HEIGHT = cfg.img_height
@@ -39,6 +41,8 @@ IMG_WIDTH = cfg.img_width
 # create dataset of file paths
 train_list_ds = tf.data.Dataset.list_files(str(train_data_dir / '*/*.jpg'))
 test_list_ds = tf.data.Dataset.list_files(str(test_data_dir / '*/*.jpg'))
+
+# print label array for 5 random images
 for f in train_list_ds.take(5):
     print('train image path: ', f.numpy())
 
@@ -50,7 +54,6 @@ for f in test_list_ds.take(5):
 def get_label(file_path):
     # convert the path to a list of path components
     parts = tf.strings.split(file_path, os.path.sep)
-    print("parts", tf.where(parts[-2] == CLASS_NAMES))
     # The second to last is the class-directory
     return parts[-2] == CLASS_NAMES
 
@@ -145,7 +148,7 @@ model_new = Sequential([
     MaxPooling2D(),
     Flatten(),
     Dense(512, activation='relu'),
-    Dense(3, activation='softmax')
+    Dense(NUMER_OF_CLASSES, activation='softmax')
 ])
 
 # CategoricalCrossentropy: Computes the crossentropy loss between the labels and predictions.
@@ -178,9 +181,11 @@ if platform.system() == "Windows":
     deeper_folder_path2 = deeper_folder_path + "/plugins"
     deeper_folder_path3 = deeper_folder_path2 + "/profile"
 
+
     def create_folder_if_not_exists(folder_name):
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
+
 
     create_folder_if_not_exists(time_folder_path)
     create_folder_if_not_exists(deeper_folder_path)

@@ -1,13 +1,4 @@
-Alina, woher die infos Batch_Size etc.?
-
-
-besser config file mit hyperparametern machen, statt die verteilt im code haben?
-
-
-TODO: crop, noise etc.?
-
-
-define loss function
+crop, noise etc.
 
 
 README hübsch machen
