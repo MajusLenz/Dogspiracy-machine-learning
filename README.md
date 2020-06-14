@@ -25,7 +25,7 @@ Open Interpreter Settings and add Anaconda Interpreter.
 
 ### Run project
 
-Run file "Main.py" to train the sample data.
+Run file ["Main.py"](_Main.py_) to train the sample data.
 
 ## Data Set 
 
