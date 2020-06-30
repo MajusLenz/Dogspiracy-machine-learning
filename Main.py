@@ -156,17 +156,18 @@ show_batch(image_batch, label_batch)
 
 # TODO add more Layers: Conv2D, MaxPooling2D, Dropout
 # Dropout(0.2),
-# Conv2D(32, 3, padding='same', activation='relu'),
+# Conv2D(32, 5, padding='same', activation='relu'),
 # MaxPooling2D(),
-# Conv2D(64, 3, padding='same', activation='relu'),
+# Conv2D(64, 5, padding='same', activation='relu'),
 # MaxPooling2D(),
 # Dropout(0.2),
 
 model_new = Sequential([
-    Conv2D(16, 3, padding='same', activation='relu',
-           input_shape=(IMG_HEIGHT, IMG_WIDTH, 3), bias_initializer="he_normal"),
+    Conv2D(filters=16, kernel_size=5, padding='same', activation='relu',
+           kernel_initializer="he_normal",  # good init for ReLu
+           input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),  # add "input_shape" because this is the first layer of the Net
     MaxPooling2D(),
-    Flatten(),
+    Flatten(),  # transform 2D to 1D
     Dense(512, activation='relu'),
     Dense(NUMER_OF_CLASSES, activation='softmax')
 ])
@@ -219,7 +220,7 @@ tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
 STEPS_PER_EPOCH = np.ceil(train_image_count / BATCH_SIZE)
 val_steps = np.ceil(test_image_count / BATCH_SIZE)
 
-#tf.random.set_seed(1)
+# tf.random.set_seed(1)
 
 model_new.fit(
     train_ds,
