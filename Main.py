@@ -43,6 +43,20 @@ LEARNING_RATE = cfg.learning_rate
 train_list_ds = tf.data.Dataset.list_files(str(train_data_dir / '*/*.jpg'))
 test_list_ds = tf.data.Dataset.list_files(str(test_data_dir / '*/*.jpg'))
 
+# prepare GPUs
+gpus = tf.config.experimental.list_physical_devices("GPU")
+if gpus:
+    try:
+        # Currently, memory growth needs to be the same across GPUs
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+        logical_gpus = tf.config.experimental.list_logical_devices("GPU")
+        print(
+            len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+    except RuntimeError as e:
+        # Memory growth must be set before GPUs have been initialized
+        print(e)
+
 
 # # print path for 5 random images from each set
 # for f in train_list_ds.take(5):
@@ -201,7 +215,6 @@ if platform.system() == "Windows":
 
 logdir = logdir_first_part + now_time
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
-
 
 STEPS_PER_EPOCH = np.ceil(train_image_count / BATCH_SIZE)
 val_steps = np.ceil(test_image_count / BATCH_SIZE)
