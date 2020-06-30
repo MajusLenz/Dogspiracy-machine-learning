@@ -164,7 +164,7 @@ show_batch(image_batch, label_batch)
 
 model_new = Sequential([
     Conv2D(16, 3, padding='same', activation='relu',
-           input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
+           input_shape=(IMG_HEIGHT, IMG_WIDTH, 3), bias_initializer="he_normal"),
     MaxPooling2D(),
     Flatten(),
     Dense(512, activation='relu'),
