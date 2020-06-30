@@ -5,3 +5,21 @@ cropping, resizing, noising and rotation ?
 
 
 GPU nutzen?
+
+
+
+Vergleich zw. mehreren Trainingsansätzen:
+    Ideen:
+
+        optimizier 1 Adam um alle bilder nehmen zu können
+        optimizier 2 irgendein anderer als Adagrad / Adam und Bildanzahlen auf 148 beschränken
+
+        HE initialisierung nehmen, weil gut mit ReLu funktiioniert
+        orthogonale o.ä. als andere Intitialisierung ausprobieren
+
+        "Transfer learning" from "VGG16" Model -> deren first layers klauen und für uns verwenden
+
+
+
+
+

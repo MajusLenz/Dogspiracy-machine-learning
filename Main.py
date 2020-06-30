@@ -29,7 +29,7 @@ test_data_dir = pathlib.Path(test_data_dir)
 
 # get possible breed names
 CLASS_NAMES = np.array([item.name for item in test_data_dir.glob('*')])
-print('breed names: ', CLASS_NAMES)
+print('all breed names: ', CLASS_NAMES)
 
 NUMER_OF_CLASSES = len(CLASS_NAMES)
 
@@ -43,12 +43,13 @@ LEARNING_RATE = cfg.learning_rate
 train_list_ds = tf.data.Dataset.list_files(str(train_data_dir / '*/*.jpg'))
 test_list_ds = tf.data.Dataset.list_files(str(test_data_dir / '*/*.jpg'))
 
-# print label array for 5 random images
-for f in train_list_ds.take(5):
-    print('train image path: ', f.numpy())
 
-for f in test_list_ds.take(5):
-    print('test image path: ', f.numpy())
+# # print path for 5 random images from each set
+# for f in train_list_ds.take(5):
+#     print('train image path: ', f.numpy())
+#
+# for f in test_list_ds.take(5):
+#     print('test image path: ', f.numpy())
 
 
 # convert file path to an (img, label) pair
@@ -84,15 +85,13 @@ if platform.system() == "Windows":
 
 # Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
 train_labeled_ds = train_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
-for image, label in train_labeled_ds.take(1):
-    print("Image shape: ", image.numpy().shape)
-    print("Label: ", label.numpy())
-
-# Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
 test_labeled_ds = test_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
-for image, label in test_labeled_ds.take(1):
-    print("Image shape: ", image.numpy().shape)
-    print("Label: ", label.numpy())
+
+
+# # show label array of one random example image from the train dataset
+# for image, label in train_labeled_ds.take(1):
+#     print("Image shape: ", image.numpy().shape)
+#     print("Label: ", label.numpy())
 
 
 def prepare_for_training(ds, cache=True, shuffle_buffer_size=1000):
@@ -119,10 +118,12 @@ def prepare_for_training(ds, cache=True, shuffle_buffer_size=1000):
 train_ds = prepare_for_training(train_labeled_ds)
 test_ds = prepare_for_training(test_labeled_ds)
 
+
+# Plot example images:
+'''
 # set variables for plot (either train or test dataset)
 image_batch, label_batch = next(iter(train_ds))
 # image_batch, label_batch = next(iter(test_ds))
-
 
 # define plots
 def show_batch(image_batch, label_batch):
@@ -135,8 +136,11 @@ def show_batch(image_batch, label_batch):
 
     return plt.show()
 
+show_batch(image_batch, label_batch)
+'''
 
-# TODO ADD more Layers: Conv2D, MaxPooling2D, Dropout
+
+# TODO add more Layers: Conv2D, MaxPooling2D, Dropout
 # Dropout(0.2),
 # Conv2D(32, 3, padding='same', activation='relu'),
 # MaxPooling2D(),
