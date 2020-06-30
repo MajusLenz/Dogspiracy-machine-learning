@@ -1,4 +1,6 @@
 training verbessern
+    mehr layers hinzufügen
+        gucken was layers können (Nutzen, Parameter, etc.)
 
 
 cropping, resizing, noising and rotation ?
@@ -8,9 +10,9 @@ GPU nutzen?
 
 
 
-Vergleich zw. mehreren Trainingsansätzen:
-    Ideen:
 
+Vergleich zw. mehreren Trainingsansätzen für wiss. Arbeit:
+    Ideen:
         optimizier 1 Adam um alle bilder nehmen zu können
         optimizier 2 irgendein anderer als Adagrad / Adam und Bildanzahlen auf 148 beschränken
 

@@ -219,6 +219,8 @@ tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
 STEPS_PER_EPOCH = np.ceil(train_image_count / BATCH_SIZE)
 val_steps = np.ceil(test_image_count / BATCH_SIZE)
 
+#tf.random.set_seed(1)
+
 model_new.fit(
     train_ds,
     steps_per_epoch=STEPS_PER_EPOCH,
