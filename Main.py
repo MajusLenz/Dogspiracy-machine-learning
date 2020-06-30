@@ -37,6 +37,7 @@ NUMER_OF_CLASSES = len(CLASS_NAMES)
 BATCH_SIZE = cfg.batch_size
 IMG_HEIGHT = cfg.img_height
 IMG_WIDTH = cfg.img_width
+LEARNING_RATE = cfg.learning_rate
 
 # create dataset of file paths
 train_list_ds = tf.data.Dataset.list_files(str(train_data_dir / '*/*.jpg'))
@@ -120,8 +121,6 @@ test_ds = prepare_for_training(test_labeled_ds)
 
 # set variables for plot (either train or test dataset)
 image_batch, label_batch = next(iter(train_ds))
-
-
 # image_batch, label_batch = next(iter(test_ds))
 
 
@@ -159,7 +158,7 @@ model_new = Sequential([
 # We expect labels to be provided in a one_hot representation.
 # categorical_accuracy: Calculates how often predictions matches one-hot labels.
 model_new.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
+    optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),
     loss=tf.keras.losses.CategoricalCrossentropy(
         from_logits=False,
         label_smoothing=0,
@@ -195,8 +194,10 @@ if platform.system() == "Windows":
     create_folder_if_not_exists(deeper_folder_path2)
     create_folder_if_not_exists(deeper_folder_path3)
 
+
 logdir = logdir_first_part + now_time
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
+
 
 STEPS_PER_EPOCH = np.ceil(train_image_count / BATCH_SIZE)
 val_steps = np.ceil(test_image_count / BATCH_SIZE)

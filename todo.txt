@@ -1,3 +1,6 @@
+training verbessern
+
+
 cropping, resizing, noising and rotation ?
 
 
