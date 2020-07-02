@@ -163,24 +163,13 @@ show_batch(image_batch, label_batch)
 # Dropout(0.2),
 
 model_new = Sequential([
-    Conv2D(filters=16, kernel_size=5, padding='same', activation='relu',
-           #kernel_initializer="he_normal",  # good init for ReLu
+    Conv2D(filters=16, kernel_size=7, padding='same', activation='relu',
            input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),  # add "input_shape" because this is the first layer of the Net
-    MaxPooling2D(),
-Conv2D(32, 5, padding="same", activation="relu"),
-        MaxPooling2D(),
-        Conv2D(32, 5, padding="same", activation="relu",
-               #kernel_initializer="he_normal"
-               ),
-        MaxPooling2D(),
-        Conv2D(64, 5, padding="same", activation="relu",
-               #kernel_initializer="he_normal"
-               ),
-        MaxPooling2D(),
-        Conv2D(64, 5, padding="same", activation="relu",
-               #kernel_initializer="he_normal"
-               ),
-        MaxPooling2D(),
+    MaxPooling2D(padding='same'),
+    Conv2D(32, 5, padding="same", activation="relu"),
+    MaxPooling2D(padding='same'),
+    Conv2D(64, 3, padding="same", activation="relu"),
+    MaxPooling2D(padding='same'),
     Flatten(),  # transform 2D to 1D
     Dense(512, activation='relu'),
     Dense(NUMER_OF_CLASSES, activation='softmax')
