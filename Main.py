@@ -167,6 +167,20 @@ model_new = Sequential([
            kernel_initializer="he_normal",  # good init for ReLu
            input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),  # add "input_shape" because this is the first layer of the Net
     MaxPooling2D(),
+Conv2D(32, 5, padding="same", activation="relu"),
+        MaxPooling2D(),
+        Conv2D(32, 5, padding="same", activation="relu",
+               kernel_initializer="he_normal"
+               ),
+        MaxPooling2D(),
+        Conv2D(64, 5, padding="same", activation="relu",
+               kernel_initializer="he_normal"
+               ),
+        MaxPooling2D(),
+        Conv2D(64, 5, padding="same", activation="relu",
+               kernel_initializer="he_normal"
+               ),
+        MaxPooling2D(),
     Flatten(),  # transform 2D to 1D
     Dense(512, activation='relu'),
     Dense(NUMER_OF_CLASSES, activation='softmax')
@@ -176,6 +190,7 @@ model_new = Sequential([
 # Use this crossentropy loss function when there are two or more label classes.
 # We expect labels to be provided in a one_hot representation.
 # categorical_accuracy: Calculates how often predictions matches one-hot labels.
+
 model_new.compile(
     optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),
     loss=tf.keras.losses.CategoricalCrossentropy(
