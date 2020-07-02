@@ -57,6 +57,9 @@ if gpus:
         # Memory growth must be set before GPUs have been initialized
         print(e)
 
+print("count of usable GPUs: ")
+print(len(gpus))
+
 
 # # print path for 5 random images from each set
 # for f in train_list_ds.take(5):
