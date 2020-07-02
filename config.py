@@ -4,6 +4,7 @@
 stanford_dir = "data/stanford/images/"
 train_dir = "data/images/train/"
 test_dir = "data/images/test/"
+validate_dir = "data/images/validate/"
 
 # this info comes from the dataset.
 # To ensure that every breed has the same number of images to train and to test,

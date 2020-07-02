@@ -13,6 +13,7 @@ max_number_of_train_images_per_breed = cfg.max_number_of_train_images_per_breed
 max_number_of_test_images_per_breed = max_number_of_images_per_breed - max_number_of_train_images_per_breed
 train_dir = cfg.train_dir
 test_dir = cfg.test_dir
+validate_dir = cfg.validate_dir
 stanford_dir = cfg.stanford_dir
 
 
@@ -34,25 +35,32 @@ for stanford_breed_folder in os.scandir(stanford_dir):
 
     create_folder_if_not_exists(train_dir + clean_breed_name)
     create_folder_if_not_exists(test_dir + clean_breed_name)
+    create_folder_if_not_exists(validate_dir + clean_breed_name)
 
     # iterate over all images inside a breed folder
     for image in os.scandir(stanford_dir + breed_name):
 
-        if image_counter >= max_number_of_images_per_breed:
-            break
+        if image_counter < max_number_of_images_per_breed:
 
-        destination_folder = train_dir
+            destination_folder = train_dir
 
-        if image_counter >= max_number_of_train_images_per_breed:
-            destination_folder = test_dir
+            if image_counter >= max_number_of_train_images_per_breed:
+                destination_folder = test_dir
+
+        else:
+            destination_folder = validate_dir
 
         # copy image to new destination
         try:
             file_name = image.name
             location_path = stanford_dir + breed_name + "/" + file_name
             destination = destination_folder + clean_breed_name + "/" + file_name
+            file_size = os.path.getsize(location_path)
 
-            copyfile(location_path, destination)
-            image_counter = image_counter +1
+            if file_size > 0:
+                copyfile(location_path, destination)
+                image_counter = image_counter + 1
+            else:
+                print("file " + location_path + " is empty (0 byte). was not copied!")
         except:
             traceback.print_exc()
