@@ -139,3 +139,4 @@ dmypy.json
 /data/flower_photos/
 /data/flower_photos_few/
 /data/flower_photos_few/
+/saved_model/my_model/

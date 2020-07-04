@@ -11,6 +11,7 @@ Please add the following packages:
 *   Numpy
 *   Pathlib   
 *   Matplotlib (optional)
+*   pyyaml
 
 Make sure to have Python 3.7 installed.
 

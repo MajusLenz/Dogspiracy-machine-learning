@@ -6,9 +6,22 @@ training verbessern
 cropping, resizing, noising and rotation ?
 
 
+Bilder Ploten
+
+
 GPU nutzen?
 
 
+Validierung
+
+
+Predicter
+
+
+RECHNEN lassen
+
+
+README updaten
 
 
 Vergleich zw. mehreren Trainingsansätzen für wiss. Arbeit:
