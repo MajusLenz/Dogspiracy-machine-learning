@@ -1,6 +1,6 @@
-# This script reads images from the data folders, prepossesses the data.
-# it than creates and returns batches of key-value-pairs from the processed images with their corresponding breed-labels
-# than it trains a model via tensorflow that learns to classify the images into dog-breeds.
+# This script creates a model to classify dog-breeds from images or loads an existing model from the disk.
+# It then either trains the model via tensorflow, or evaluates the model's quality.
+# The performed action can be changed via config.py. (See: "PARAMS TO CHOOSE PATHS IN Main.py")
 
 from datetime import datetime
 import platform
@@ -253,7 +253,7 @@ elif ACTION == "evaluate":
     # prepare dataset
     validate_ds = prepare_dataset(validate_labeled_ds)
 
-    results = model.evaluate(validate_ds, steps=10)
+    results = model.evaluate(validate_ds, steps=100)
 
     print("")
     print("model_accuracy: " + str(results[1]))
