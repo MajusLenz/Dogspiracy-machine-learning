@@ -3,6 +3,7 @@ stanford_dir = "data/stanford/images/"
 train_dir = "data/images/train/"
 test_dir = "data/images/test/"
 validate_dir = "data/images/validate/"
+predict_dir = "data/images/predict/"
 
 # data directory where the model is saved to and loaded from
 saved_model_dir = "saved_model/"
@@ -22,18 +23,18 @@ number_of_epochs = 1
 learning_rate = 1e-4
 
 
-
-# PARAMS TO CHOOSE PATHS IN Main.py:
-
-# Shall model be loaded or created?
-# False := create new model instead of loading one
-# "MODELNAME" := load model with this name instead of creating new one.  Example: model_name_to_be_loaded = "my_model"
-model_name_to_be_loaded = "my_model"
+# PARAMS TO CHOOSE CONTROL FLOW IN Main.py:
 
 # Shall model be trained or validated
-# "train" := train model and save it afterwards
-# "evaluate" := evaluate model
-action = "evaluate"
+# "train"       := train model and save it afterwards
+# "evaluate"    := evaluate model
+# "predict"     := predict classes of images in predict-folder
+action = "train"
+
+# Shall model be loaded or created?
+# False         := create new model instead of loading one
+# "MODELNAME"   := load model with this name instead of creating new one.  Example: model_name_to_be_loaded = "my_model"
+model_name_to_be_loaded = "my_model"
 
 # name of the model that gets saved. Careful: Existing model with this name will be overwritten!
 new_model_name = "my_model"

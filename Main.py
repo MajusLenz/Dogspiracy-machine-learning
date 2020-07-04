@@ -1,6 +1,6 @@
 # This script creates a model to classify dog-breeds from images or loads an existing model from the disk.
 # It then either trains the model via tensorflow, or evaluates the model's quality.
-# The performed action can be changed via config.py. (See: "PARAMS TO CHOOSE PATHS IN Main.py")
+# The performed action can be changed via config.py. (See: "PARAMS TO CHOOSE CONTROL FLOW IN Main.py")
 
 from datetime import datetime
 import platform
@@ -8,7 +8,7 @@ import platform
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D
-
+# tf.random.set_seed(1337)
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 import numpy as np
@@ -23,6 +23,7 @@ saved_model_dir = cfg.saved_model_dir
 train_data_dir = cfg.train_dir
 test_data_dir = cfg.test_dir
 validate_data_dir = cfg.validate_dir
+predict_data_dir = cfg.predict_dir
 IMG_HEIGHT = cfg.img_height
 IMG_WIDTH = cfg.img_width
 BATCH_SIZE = cfg.batch_size
@@ -32,11 +33,10 @@ MODEL_NAME_TO_BE_LOADED = cfg.model_name_to_be_loaded
 NEW_MODEL_NAME = cfg.new_model_name
 ACTION = cfg.action
 
-
-# data directory for preparing data (either train or test data)
 train_data_dir = pathlib.Path(train_data_dir)
 test_data_dir = pathlib.Path(test_data_dir)
 validate_data_dir = pathlib.Path(validate_data_dir)
+predict_data_dir = pathlib.Path(predict_data_dir)
 
 
 # get possible breed names
@@ -89,18 +89,12 @@ def process_path(file_path):
     return img, this_label
 
 
-def prepare_dataset(ds, cache=True, shuffle_buffer_size=1000):
-    # if cache:
-    #     if isinstance(cache, str):
-    #         ds = ds.cache(cache)
-    #     else:
-    #         ds = ds.cache()
+def prepare_dataset(ds, shuffle=True, cache=True, shuffle_buffer_size=1000):
 
-    # allocate buffer
-    ds = ds.shuffle(buffer_size=shuffle_buffer_size)
-
-    # re-initialize the dataset
-    ds = ds.repeat()
+    if shuffle:
+        ds = ds.shuffle(buffer_size=shuffle_buffer_size)
+        # re-initialize the dataset
+        ds = ds.repeat()
 
     ds = ds.batch(BATCH_SIZE)
 
@@ -158,8 +152,6 @@ if ACTION == "train":
     # create datasets from file paths
     train_list_ds = tf.data.Dataset.list_files(str(train_data_dir / '*/*.jpg'))
     test_list_ds = tf.data.Dataset.list_files(str(test_data_dir / '*/*.jpg'))
-
-    # label dataset
     train_labeled_ds = train_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
     test_labeled_ds = test_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
 
@@ -223,13 +215,6 @@ if ACTION == "train":
     STEPS_PER_EPOCH = np.ceil(train_image_count / BATCH_SIZE)
     val_steps = np.ceil(test_image_count / BATCH_SIZE)
 
-    # tf.random.set_seed(1337)
-
-
-    # TODO delete
-    STEPS_PER_EPOCH = 2
-    val_steps = 1
-
     model.fit(
         train_ds,
         steps_per_epoch=STEPS_PER_EPOCH,
@@ -246,15 +231,37 @@ elif ACTION == "evaluate":
 
     # create validation dataset from file paths
     validate_list_ds = tf.data.Dataset.list_files(str(validate_data_dir / '*/*.jpg'))
-
-    # label dataset
     validate_labeled_ds = validate_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
 
     # prepare dataset
     validate_ds = prepare_dataset(validate_labeled_ds)
 
     results = model.evaluate(validate_ds, steps=100)
-
     print("")
     print("model_accuracy: " + str(results[1]))
     print("loss: " + str(results[0]))
+
+elif ACTION == "predict":
+
+    # create predict dataset from file paths
+    predict_list_ds = tf.data.Dataset.list_files(str(predict_data_dir / '*.jpg'))
+    predict_ds = predict_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
+
+    # prepare dataset
+    predict_ds = prepare_dataset(predict_ds, shuffle=False)
+
+    _, _, files = next(os.walk(str(predict_data_dir)))
+    number_of_images = len(files)
+
+    results = model.predict(predict_ds, steps=number_of_images)
+
+    for result_index, result in enumerate(results):
+        max_prediction = max(result)
+        max_prediction_index = result.tolist().index(max_prediction)
+        predicted_class = CLASS_NAMES[max_prediction_index]
+
+        image_name = files[result_index]
+        print("Class '" + predicted_class + "' was predicted for image " + image_name)
+
+else:
+    print("unknown action! please set action to 'train', 'evaluate' or 'predict' in config.py")
