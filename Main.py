@@ -1,7 +1,7 @@
 # This script creates a model to classify dog-breeds from images or loads an existing model from the disk.
 # It then either trains the model via tensorflow, or evaluates the model's quality.
 # The performed action can be changed via config.py. (See: "PARAMS TO CHOOSE CONTROL FLOW IN Main.py")
-
+import sys
 from datetime import datetime
 import platform
 
@@ -37,6 +37,12 @@ train_data_dir = pathlib.Path(train_data_dir)
 test_data_dir = pathlib.Path(test_data_dir)
 validate_data_dir = pathlib.Path(validate_data_dir)
 predict_data_dir = pathlib.Path(predict_data_dir)
+
+
+# get CLI arguments
+cli_argument = None
+if len(sys.argv) > 1:
+    cli_argument = sys.argv[1]
 
 
 # get possible breed names
@@ -113,9 +119,11 @@ if platform.system() == "Windows":
 
 
 if MODEL_NAME_TO_BE_LOADED:
+    print("loading model " + MODEL_NAME_TO_BE_LOADED)
     model = tf.keras.models.load_model(saved_model_dir + MODEL_NAME_TO_BE_LOADED + ".h5")
 
 else:
+    print("creating new model")
     model = Sequential([
         Conv2D(filters=16, kernel_size=7, padding='same', activation='relu',
                input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),  # add "input_shape" because this is the first layer of the Net
@@ -147,7 +155,8 @@ else:
 
 model.summary()
 
-if ACTION == "train":
+if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
+    print("start training the model")
 
     # create datasets from file paths
     train_list_ds = tf.data.Dataset.list_files(str(train_data_dir / '*/*.jpg'))
@@ -227,7 +236,8 @@ if ACTION == "train":
 
     model.save(saved_model_dir + NEW_MODEL_NAME + '.h5')
 
-elif ACTION == "evaluate":
+elif ACTION == "evaluate" or (ACTION == "cli" and cli_argument == "evaluate"):
+    print("start evaluating the model")
 
     # create validation dataset from file paths
     validate_list_ds = tf.data.Dataset.list_files(str(validate_data_dir / '*/*.jpg'))
@@ -241,7 +251,8 @@ elif ACTION == "evaluate":
     print("model_accuracy: " + str(results[1]))
     print("loss: " + str(results[0]))
 
-elif ACTION == "predict":
+elif ACTION == "predict" or (ACTION == "cli" and cli_argument == "predict"):
+    print("start prediction")
 
     # create predict dataset from file paths
     predict_list_ds = tf.data.Dataset.list_files(str(predict_data_dir / '*.jpg'))
@@ -264,4 +275,9 @@ elif ACTION == "predict":
         print("Class '" + predicted_class + "' was predicted for image " + image_name)
 
 else:
-    print("unknown action! please set action to 'train', 'evaluate' or 'predict' in config.py")
+    if ACTION == "cli":
+        print("please set the action to be executed in this script via the cli-argument when executing this script.")
+        print("Example:  Main.py train")
+        print("Possible actions: 'train', 'evaluate', 'predict'. For more Information see config.py")
+    else:
+        print("unknown action! please set action to 'train', 'evaluate' or 'predict' in config.py")

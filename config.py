@@ -25,11 +25,12 @@ learning_rate = 1e-4
 
 # PARAMS TO CHOOSE CONTROL FLOW IN Main.py:
 
-# Shall model be trained or validated
+# Shall model be trained, validated or shall a prediction be made
 # "train"       := train model and save it afterwards
-# "evaluate"    := evaluate model
+# "evaluate"    := evaluate model with validation data
 # "predict"     := predict classes of images in predict-folder
-action = "train"
+# "cli"         := action is set via cli-argument instead, when starting Main.py.   Example:  Main.py train
+action = "cli"
 
 # Shall model be loaded or created?
 # False         := create new model instead of loading one
