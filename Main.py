@@ -30,7 +30,7 @@ BATCH_SIZE = cfg.batch_size
 NUMBER_OF_EPOCHS = cfg.number_of_epochs
 LEARNING_RATE = cfg.learning_rate
 MODEL_NAME_TO_BE_LOADED = cfg.model_name_to_be_loaded
-NEW_MODEL_NAME = cfg.new_model_name
+MODEL_NAME_TO_BE_SAVED = cfg.model_name_to_be_saved
 ACTION = cfg.action
 
 train_data_dir = pathlib.Path(train_data_dir)
@@ -225,11 +225,9 @@ if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
         deeper_folder_path2 = deeper_folder_path + "/plugins"
         deeper_folder_path3 = deeper_folder_path2 + "/profile"
 
-
         def create_folder_if_not_exists(folder_name):
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
-
 
         create_folder_if_not_exists(time_folder_path)
         create_folder_if_not_exists(deeper_folder_path)
@@ -252,7 +250,7 @@ if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
         validation_freq=10
     )
 
-    model.save(saved_model_dir + NEW_MODEL_NAME + '.h5')
+    model.save(saved_model_dir + MODEL_NAME_TO_BE_SAVED + '.h5')
 
 elif ACTION == "evaluate" or (ACTION == "cli" and cli_argument == "evaluate"):
     print("start evaluating the model")

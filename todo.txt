@@ -1,21 +1,7 @@
-training verbessern
-    mehr layers hinzufügen
-        gucken was layers können (Nutzen, Parameter, etc.)
-
-
-cropping, resizing, noising and rotation ?
+Dropout
 
 
 Bilder Ploten
-
-
-GPU nutzen?
-
-
-Validierung
-
-
-Predicter
 
 
 RECHNEN lassen

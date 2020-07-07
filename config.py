@@ -32,10 +32,14 @@ learning_rate = 1e-4
 # "cli"         := action is set via cli-argument instead, when starting Main.py.   Example:  Main.py train
 action = "cli"
 
+
+model_name = "Adam_CategoricalCrossentropy_Conv7-16_Conv5-32_Conv3-64_Dense512"
+model_name += "_IH" + str(img_height) + "_IW" + str(img_width) + "_BSize" + str(batch_size) + "_LR" + str(learning_rate)
+
 # Shall model be loaded or created?
 # False         := create new model instead of loading one
 # "MODELNAME"   := load model with this name instead of creating new one.  Example: model_name_to_be_loaded = "my_model"
-model_name_to_be_loaded = "my_model"
+model_name_to_be_loaded = model_name
 
 # name of the model that gets saved. Careful: Existing model with this name will be overwritten!
-new_model_name = "my_model"
+model_name_to_be_saved = model_name
