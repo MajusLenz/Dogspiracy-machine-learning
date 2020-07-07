@@ -18,7 +18,7 @@ max_number_of_train_images_per_breed = 118  # 80/20 Ratio
 # LEARNING HYPER PARAMETERS:
 img_height = 224
 img_width = 224
-batch_size = 1
+batch_size = 16
 number_of_epochs = 1
 learning_rate = 1e-4
 

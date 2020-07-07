@@ -264,7 +264,7 @@ elif ACTION == "evaluate" or (ACTION == "cli" and cli_argument == "evaluate"):
     # prepare dataset
     validate_ds = prepare_dataset(validate_labeled_ds)
 
-    results = model.evaluate(validate_ds, steps=100)
+    results = model.evaluate(validate_ds, steps=500)
     print("")
     print("model_accuracy: " + str(results[1]))
     print("loss: " + str(results[0]))
@@ -293,6 +293,7 @@ elif ACTION == "predict" or (ACTION == "cli" and cli_argument == "predict"):
         print("Class '" + predicted_class + "' was predicted for image " + image_name)
 
 else:
+    # unknown action
     if ACTION == "cli":
         print("please set the action to be executed in this script via the cli-argument when executing this script.")
         print("Example:  Main.py train")
