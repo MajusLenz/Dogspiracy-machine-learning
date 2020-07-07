@@ -95,12 +95,16 @@ def process_path(file_path):
     return img, this_label
 
 
-def prepare_dataset(ds, shuffle=True, cache=True, shuffle_buffer_size=1000):
+def prepare_dataset(ds, shuffle=True, cache=True, shuffle_buffer_size=1000, augment=False):
 
     if shuffle:
         ds = ds.shuffle(buffer_size=shuffle_buffer_size)
         # re-initialize the dataset
         ds = ds.repeat()
+
+    if augment:
+        # TODO Put augmentation here. call prepare_dataset with param augment=True for Training-Dataset
+        pass
 
     ds = ds.batch(BATCH_SIZE)
 
@@ -165,7 +169,7 @@ if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
     test_labeled_ds = test_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
 
     # prepare dataset
-    train_ds = prepare_dataset(train_labeled_ds)
+    train_ds = prepare_dataset(train_labeled_ds, augment=True)
     test_ds = prepare_dataset(test_labeled_ds)
 
     train_image_count = len(list(train_data_dir.glob('*/*.jpg')))
