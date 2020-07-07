@@ -8,6 +8,7 @@ import platform
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D
+
 # tf.random.set_seed(1337)
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
@@ -16,7 +17,6 @@ import matplotlib.pyplot as plt
 import os
 import pathlib
 import config as cfg
-
 
 # get config parameters
 saved_model_dir = cfg.saved_model_dir
@@ -38,19 +38,16 @@ test_data_dir = pathlib.Path(test_data_dir)
 validate_data_dir = pathlib.Path(validate_data_dir)
 predict_data_dir = pathlib.Path(predict_data_dir)
 
-
 # get CLI arguments
 cli_argument = None
 if len(sys.argv) > 1:
     cli_argument = sys.argv[1]
 
-
 # get possible breed names
 CLASS_NAMES = np.array([item.name for item in test_data_dir.glob('*')])
 print('all breed names: ', CLASS_NAMES)
 
-NUMER_OF_CLASSES = len(CLASS_NAMES)
-
+NUMBER_OF_CLASSES = len(CLASS_NAMES)
 
 # prepare GPUs
 gpus = tf.config.experimental.list_physical_devices("GPU")
@@ -95,16 +92,33 @@ def process_path(file_path):
     return img, this_label
 
 
-def prepare_dataset(ds, shuffle=True, cache=True, shuffle_buffer_size=1000, augment=False):
+# augment data
+def convert(image, label):
+    image = tf.image.convert_image_dtype(image, tf.float32)  # Cast and normalize the image to [0,1]
+    return image, label
 
+
+def augment(image, label):
+    image, label = convert(image, label)
+    image = tf.image.convert_image_dtype(image, tf.float32)  # Cast and normalize the image to [0,1]
+    image = tf.image.flip_left_right(image)  # Flip horizontally
+    image = tf.image.rot90(image)
+    image = tf.image.resize_with_crop_or_pad(image, 272, 272)  # Add 48 pixels of padding
+    image = tf.image.random_crop(image, size=[IMG_HEIGHT, IMG_WIDTH, 3])  # Random crop back to 224 x 224
+    image = tf.image.adjust_saturation(image, 2)
+    image = tf.image.random_brightness(image, max_delta=0.5)  # Random brightness
+    return image, label
+
+
+def prepare_dataset(ds, shuffle=True, shuffle_buffer_size=1000, is_augment=False):
     if shuffle:
         ds = ds.shuffle(buffer_size=shuffle_buffer_size)
         # re-initialize the dataset
         ds = ds.repeat()
 
-    if augment:
-        # TODO Put augmentation here. call prepare_dataset with param augment=True for Training-Dataset
-        pass
+    # call prepare_dataset with param is_augment=True for Training-Dataset
+    if is_augment:
+        ds = ds.map(augment, num_parallel_calls=AUTOTUNE)
 
     ds = ds.batch(BATCH_SIZE)
 
@@ -120,7 +134,6 @@ num_parallel_calls_param = AUTOTUNE
 # fix nasty bug, that occurs in older Windows Version if you try to parallelly process multiple images
 if platform.system() == "Windows":
     num_parallel_calls_param = None
-
 
 if MODEL_NAME_TO_BE_LOADED:
     print("loading model " + MODEL_NAME_TO_BE_LOADED)
@@ -138,7 +151,7 @@ else:
         MaxPooling2D(padding='same'),
         Flatten(),  # transform 2D to 1D
         Dense(512, activation='relu'),
-        Dense(NUMER_OF_CLASSES, activation='softmax')
+        Dense(NUMBER_OF_CLASSES, activation='softmax')
     ])
 
     # CategoricalCrossentropy: Computes the crossentropy loss between the labels and predictions.
@@ -156,7 +169,6 @@ else:
         ),
         metrics=['categorical_accuracy', 'accuracy'])
 
-
 model.summary()
 
 if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
@@ -169,7 +181,7 @@ if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
     test_labeled_ds = test_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
 
     # prepare dataset
-    train_ds = prepare_dataset(train_labeled_ds, augment=True)
+    train_ds = prepare_dataset(train_labeled_ds, is_augment=True)
     test_ds = prepare_dataset(test_labeled_ds)
 
     train_image_count = len(list(train_data_dir.glob('*/*.jpg')))
@@ -213,9 +225,11 @@ if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
         deeper_folder_path2 = deeper_folder_path + "/plugins"
         deeper_folder_path3 = deeper_folder_path2 + "/profile"
 
+
         def create_folder_if_not_exists(folder_name):
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
+
 
         create_folder_if_not_exists(time_folder_path)
         create_folder_if_not_exists(deeper_folder_path)
