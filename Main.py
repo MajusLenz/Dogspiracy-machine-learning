@@ -101,12 +101,13 @@ def convert(image, label):
 def augment(image, label):
     image, label = convert(image, label)
     image = tf.image.convert_image_dtype(image, tf.float32)  # Cast and normalize the image to [0,1]
-    image = tf.image.flip_left_right(image)  # Flip horizontally
-    image = tf.image.rot90(image)
+    image = tf.image.random_flip_left_right(image)  # Flip horizontally
     image = tf.image.resize_with_crop_or_pad(image, 272, 272)  # Add 48 pixels of padding
     image = tf.image.random_crop(image, size=[IMG_HEIGHT, IMG_WIDTH, 3])  # Random crop back to 224 x 224
-    image = tf.image.adjust_saturation(image, 2)
-    image = tf.image.random_brightness(image, max_delta=0.5)  # Random brightness
+    image = tf.image.random_jpeg_quality(image, 80, 100)
+    image = tf.image.random_saturation(image, 0.8, 1.2)
+    image = tf.image.random_contrast(image, 0.8, 1.2)
+    image = tf.image.random_brightness(image, 0.2)  # Random brightness
     return image, label
 
 
@@ -117,8 +118,8 @@ def prepare_dataset(ds, shuffle=True, shuffle_buffer_size=1000, is_augment=False
         ds = ds.repeat()
 
     # call prepare_dataset with param is_augment=True for Training-Dataset
-    if is_augment:
-        ds = ds.map(augment, num_parallel_calls=AUTOTUNE)
+    # if is_augment:
+    # ds = ds.map(augment, num_parallel_calls=AUTOTUNE)
 
     ds = ds.batch(BATCH_SIZE)
 
@@ -144,13 +145,14 @@ else:
     model = Sequential([
         Conv2D(filters=16, kernel_size=7, padding='same', activation='relu',
                input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),  # add "input_shape" because this is the first layer of the Net
-        MaxPooling2D(padding='same'),
+        MaxPooling2D(),
         Conv2D(32, 5, padding="same", activation="relu"),
-        MaxPooling2D(padding='same'),
+        MaxPooling2D(),
         Conv2D(64, 3, padding="same", activation="relu"),
-        MaxPooling2D(padding='same'),
+        MaxPooling2D(),
         Flatten(),  # transform 2D to 1D
         Dense(512, activation='relu'),
+        Dropout(0.5),
         Dense(NUMBER_OF_CLASSES, activation='softmax')
     ])
 
@@ -240,6 +242,18 @@ if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
     STEPS_PER_EPOCH = np.ceil(train_image_count / BATCH_SIZE)
     val_steps = np.ceil(test_image_count / BATCH_SIZE)
 
+    # image plotting in tensorboard
+    # Sets up a timestamped log directory.
+    # logdir = "logs/train_data/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+    # Creates a file writer for the log directory.
+    # file_writer = tf.summary.create_file_writer(logdir)
+
+    # with file_writer.as_default():
+        # Don't forget to reshape.
+        # dataset_array = list(train_ds.as_numpy_iterator())
+        # images = np.reshape(dataset_array[0:25], (-1, 28, 28, 1))
+        # tf.summary.image("25 training data examples", images, max_outputs=25, step=0)
+
     model.fit(
         train_ds,
         steps_per_epoch=STEPS_PER_EPOCH,
@@ -247,7 +261,7 @@ if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
         callbacks=[tensorboard_callback],
         validation_steps=val_steps,
         validation_data=test_ds,
-        validation_freq=10
+        validation_freq=1
     )
 
     model.save(saved_model_dir + MODEL_NAME_TO_BE_SAVED + '.h5')

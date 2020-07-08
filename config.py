@@ -1,3 +1,5 @@
+from datetime import datetime
+
 # directories where the data is located at
 stanford_dir = "data/stanford/images/"
 train_dir = "data/images/train/"
@@ -18,9 +20,9 @@ max_number_of_train_images_per_breed = 118  # 80/20 Ratio
 # LEARNING HYPER PARAMETERS:
 img_height = 224
 img_width = 224
-batch_size = 16
-number_of_epochs = 1
-learning_rate = 1e-4
+batch_size = 32
+number_of_epochs = 200
+learning_rate = 0.001
 
 
 # PARAMS TO CHOOSE CONTROL FLOW IN Main.py:
@@ -33,13 +35,14 @@ learning_rate = 1e-4
 action = "cli"
 
 
-model_name = "Adam_CategoricalCrossentropy_Conv7-16_Conv5-32_Conv3-64_Dense512"
+model_name = "Adam_CategoricalCrossentropy_Conv7-16_Conv5-32_Conv3-64_Dense512_Dropout"
 model_name += "_IH" + str(img_height) + "_IW" + str(img_width) + "_BSize" + str(batch_size) + "_LR" + str(learning_rate)
+model_name += datetime.now().strftime("%Y%m%d-%H%M%S")
 
 # Shall model be loaded or created?
 # False         := create new model instead of loading one
 # "MODELNAME"   := load model with this name instead of creating new one.  Example: model_name_to_be_loaded = "my_model"
-model_name_to_be_loaded = model_name
+model_name_to_be_loaded = False # "Adam_CategoricalCrossentropy_Conv7-16_Conv5-32_Conv3-64_Dense512_Dropout_IH224_IW224_BSize32_LR0.00120200708-204419"
 
 # name of the model that gets saved. Careful: Existing model with this name will be overwritten!
 model_name_to_be_saved = model_name
