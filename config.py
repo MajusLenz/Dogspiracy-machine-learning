@@ -4,7 +4,7 @@ from datetime import datetime
 raw_dir = "data/flowers/"
 train_dir = "data/images/train/"
 test_dir = "data/images/test/"
-validate_dir = "data/images/predict/"
+validate_dir = "data/images/validate/"
 predict_dir = "data/images/predict/"
 
 # data directory where the model is saved to and loaded from
@@ -42,7 +42,7 @@ model_name += datetime.now().strftime("%Y%m%d-%H%M%S")
 # Shall model be loaded or created?
 # False         := create new model instead of loading one
 # "MODELNAME"   := load model with this name instead of creating new one.  Example: model_name_to_be_loaded = "my_model"
-model_name_to_be_loaded = 'MODEL_NAME_TO_BE_SAVED' # "Adam_CategoricalCrossentropy_Conv7-16_Conv5-32_Conv3-64_Dense512_Dropout_IH224_IW224_BSize32_LR0.00120200708-204419"
+model_name_to_be_loaded = False # "Adam_CategoricalCrossentropy_Conv7-16_Conv5-32_Conv3-64_Dense512_Dropout_IH224_IW224_BSize32_LR0.00120200708-204419"
 
 # name of the model that gets saved. Careful: Existing model with this name will be overwritten!
 model_name_to_be_saved = model_name
