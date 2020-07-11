@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import os
 import math
@@ -29,11 +30,18 @@ RAW_DATA_DIR = pathlib.Path(cfg.raw_dir)
 
 def main():
 
+    # get CLI arguments
+    cli_argument = None
+    if len(sys.argv) > 1:
+        cli_argument = sys.argv[1]
+
     data_dir = RAW_DATA_DIR
     image_count = len(list(data_dir.glob('*/*.jpg')))
 
     CLASS_NAMES = np.array([item.name for item in data_dir.glob('*') if item.name != "LICENSE.txt"])
     NUMBER_OF_CLASSES = len(CLASS_NAMES)
+    print("total classes: " + str(NUMBER_OF_CLASSES))
+    print('all class names: ', CLASS_NAMES)
 
     list_ds = tf.data.Dataset.list_files(str(data_dir/'*/*.jpg'))
     for f in list_ds.take(5):
@@ -107,26 +115,31 @@ def main():
     test_ds = all_ds.take(n_test_examples)
     train_ds = all_ds.skip(n_test_examples)
 
-    model = Sequential([
-        Conv2D(16, 5, padding="same", activation="relu",
-            input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
-        MaxPooling2D(),
-        Conv2D(32, 5, padding="same", activation="relu"),
-        MaxPooling2D(),
-        Conv2D(32, 5, padding="same", activation="relu"),
-        MaxPooling2D(),
-        Conv2D(64, 5, padding="same", activation="relu"),
-        MaxPooling2D(),
-        Conv2D(64, 5, padding="same", activation="relu"),
-        MaxPooling2D(),
-        Flatten(),
-        Dense(512, activation="relu"),
-        Dense(NUMBER_OF_CLASSES, activation="softmax")
-        ])
+    if MODEL_NAME_TO_BE_LOADED:
+        print("loading model " + MODEL_NAME_TO_BE_LOADED)
+        model = tf.keras.models.load_model(SAVED_MODEL_DIR + MODEL_NAME_TO_BE_LOADED + ".h5")
 
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
-        loss=tf.keras.losses.SparseCategoricalCrossentropy(),
-        metrics=["accuracy"])
+    else:
+        model = Sequential([
+            Conv2D(16, 5, padding="same", activation="relu",
+                input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
+            MaxPooling2D(),
+            Conv2D(32, 5, padding="same", activation="relu"),
+            MaxPooling2D(),
+            Conv2D(32, 5, padding="same", activation="relu"),
+            MaxPooling2D(),
+            Conv2D(64, 5, padding="same", activation="relu"),
+            MaxPooling2D(),
+            Conv2D(64, 5, padding="same", activation="relu"),
+            MaxPooling2D(),
+            Flatten(),
+            Dense(512, activation="relu"),
+            Dense(NUMBER_OF_CLASSES, activation="softmax")
+            ])
+
+        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
+            loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+            metrics=["accuracy"])
 
     model.summary()
 
