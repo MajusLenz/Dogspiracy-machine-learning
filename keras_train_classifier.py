@@ -4,40 +4,29 @@ import numpy as np
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 import os
 import math
+import platform
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Flatten, MaxPooling2D
 from datetime import datetime
 
+import config as cfg
+
+# get config parameters
+IMG_HEIGHT = cfg.img_height
+IMG_WIDTH = cfg.img_width
+BATCH_SIZE = cfg.batch_size
+NUMBER_OF_EPOCHS = cfg.number_of_epochs
+LEARNING_RATE = cfg.learning_rate
+MODEL_NAME_TO_BE_SAVED = cfg.model_name_to_be_saved
 
 def main():
-    gpus = tf.config.experimental.list_physical_devices("GPU")
-    if gpus:
-        try:
-            # Currently, memory growth needs to be the same across GPUs
-            for gpu in gpus:
-                tf.config.experimental.set_memory_growth(gpu, True)
-            logical_gpus = tf.config.experimental.list_logical_devices("GPU")
-            print(
-                len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
-        except RuntimeError as e:
-            # Memory growth must be set before GPUs have been initialized
-            print(e)
-
-    # data_dir = pathlib.Path(
-    #     "/media/mati3230/d8196a77-44d0-4208-a7d3-713df9c812f5/projects/test_keras/datasets/flower_photos")
-
-    import config as cfg
-    # data_dir = pathlib.Path(cfg.train_dir)
-
     data_dir = pathlib.Path(
-        "data/flowers")
+        "data/flowers/")
     image_count = len(list(data_dir.glob('*/*.jpg')))
 
     CLASS_NAMES = np.array([item.name for item in data_dir.glob('*') if item.name != "LICENSE.txt"])
-    BATCH_SIZE = 64
-    IMG_HEIGHT = 224
-    IMG_WIDTH = 224
+    NUMBER_OF_CLASSES = len(CLASS_NAMES)
 
     list_ds = tf.data.Dataset.list_files(str(data_dir/'*/*.jpg'))
     for f in list_ds.take(5):
@@ -126,8 +115,8 @@ def main():
         MaxPooling2D(),
         Flatten(),
         Dense(512, activation="relu"),
-        Dense(5, activation="softmax")
-    ])
+        Dense(NUMBER_OF_CLASSES, activation="softmax")
+        ])
 
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
         loss=tf.keras.losses.SparseCategoricalCrossentropy(
@@ -136,8 +125,6 @@ def main():
         metrics=["accuracy"])
 
     model.summary()
-
-    import platform
 
     logdir_first_part = "./logs/scalars/"
     now_time = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -163,20 +150,16 @@ def main():
     logdir = logdir_first_part + now_time
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
 
-    for image, label in train_ds.take(1):
-        print("Image shape: ", image.numpy().shape)
-        print("Label: ", label.numpy())
-
     model.fit(
         train_ds,
         steps_per_epoch=STEPS_PER_EPOCH,
-        epochs=100,
+        epochs=NUMBER_OF_EPOCHS,
         callbacks=[tensorboard_callback],
         validation_data=test_ds,
         validation_freq=10
         )
 
-    model.save('saved_model/' + 'MODEL_NAME_TO_BE_SAVED' + '.h5')
+    model.save('saved_model/' + MODEL_NAME_TO_BE_SAVED + '.h5')
 
 if __name__ == "__main__":
     main()
