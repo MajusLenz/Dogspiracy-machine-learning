@@ -13,39 +13,31 @@ from tensorflow.keras.layers import Dense, Conv2D, Flatten, MaxPooling2D
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 
-# get config parameters
-IMG_HEIGHT = cfg.img_height
-IMG_WIDTH = cfg.img_width
-BATCH_SIZE = cfg.batch_size
-NUMBER_OF_EPOCHS = cfg.number_of_epochs
-LEARNING_RATE = cfg.learning_rate
-VALIDATE_DATA_DIR = pathlib.Path(cfg.validate_dir)
-PREDICT_DATA_DIR = pathlib.Path(cfg.predict_dir)
-SAVED_MODEL_DIR = cfg.saved_model_dir
-MODEL_NAME_TO_BE_SAVED = cfg.model_name_to_be_saved
-MODEL_NAME_TO_BE_LOADED = cfg.model_name_to_be_loaded
-ACTION = cfg.action
-RAW_DATA_DIR = pathlib.Path(cfg.raw_dir)
-
-
 def main():
+    # get config parameters
+    IMG_HEIGHT = cfg.img_height
+    IMG_WIDTH = cfg.img_width
+    BATCH_SIZE = cfg.batch_size
+    NUMBER_OF_EPOCHS = cfg.number_of_epochs
+    LEARNING_RATE = cfg.learning_rate
+    VALIDATION_FREQ = cfg.validation_freq
+    VALIDATE_DATA_DIR = pathlib.Path(cfg.validate_dir)
+    PREDICT_DATA_DIR = pathlib.Path(cfg.predict_dir)
+    SAVED_MODEL_DIR = cfg.saved_model_dir
+    MODEL_NAME_TO_BE_SAVED = cfg.model_name_to_be_saved
+    MODEL_NAME_TO_BE_LOADED = cfg.model_name_to_be_loaded
+    ACTION = cfg.action
+    RAW_DATA_DIR = pathlib.Path(cfg.raw_dir)
 
     # get CLI arguments
     cli_argument = None
     if len(sys.argv) > 1:
         cli_argument = sys.argv[1]
 
-    data_dir = RAW_DATA_DIR
-    image_count = len(list(data_dir.glob('*/*.jpg')))
-
-    CLASS_NAMES = np.array([item.name for item in data_dir.glob('*') if item.name != "LICENSE.txt"])
+    CLASS_NAMES = np.array([item.name for item in RAW_DATA_DIR.glob('*') if item.name != "LICENSE.txt"])
     NUMBER_OF_CLASSES = len(CLASS_NAMES)
     print("total classes: " + str(NUMBER_OF_CLASSES))
     print('all class names: ', CLASS_NAMES)
-
-    list_ds = tf.data.Dataset.list_files(str(data_dir/'*/*.jpg'))
-    for f in list_ds.take(5):
-        print(f.numpy())
 
     def get_label(file_path):
         # convert the path to a list of path components
@@ -72,13 +64,6 @@ def main():
         img = decode_img(img)
         return img, label
 
-    # Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
-    labeled_ds = list_ds.map(process_path, num_parallel_calls=AUTOTUNE)
-
-    for image, label in labeled_ds.take(10):
-        print("Image shape: ", image.numpy().shape)
-        print("Label: ", label.numpy())
-
     def prepare_for_training(ds, cache=True, shuffle_buffer_size=1000):
         # This is a small dataset, only load it once, and keep it in memory.
         # use `.cache(filename)` to cache preprocessing work for datasets that don't
@@ -104,19 +89,8 @@ def main():
 
         return ds
 
-    # load all images
-    all_ds = prepare_for_training(labeled_ds)
-    test_percentage = 0.2
-    # absolute nr of examples that are used for testing
-    n_test_examples = math.floor(test_percentage * image_count)
-    # how many batches should be considered in one epoch?
-    STEPS_PER_EPOCH = np.ceil((image_count - n_test_examples)/BATCH_SIZE)
-    # split in test and train dataset
-    test_ds = all_ds.take(n_test_examples)
-    train_ds = all_ds.skip(n_test_examples)
-
     if MODEL_NAME_TO_BE_LOADED:
-        print("loading model " + MODEL_NAME_TO_BE_LOADED)
+        print("loading model: " + MODEL_NAME_TO_BE_LOADED)
         model = tf.keras.models.load_model(SAVED_MODEL_DIR + MODEL_NAME_TO_BE_LOADED + ".h5")
 
     else:
@@ -137,46 +111,78 @@ def main():
             Dense(NUMBER_OF_CLASSES, activation="softmax")
             ])
 
-        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
+        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),
             loss=tf.keras.losses.SparseCategoricalCrossentropy(),
             metrics=["accuracy"])
 
     model.summary()
 
-    logdir_first_part = "./logs/scalars/"
-    now_time = datetime.now().strftime("%Y%m%d-%H%M%S")
+    if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
+        print("start training the model")
 
-    # fix very nasty Windows OS bug, that TF runs in,
-    # if those folders do not exist before TensorBoard tries to create them
-    if platform.system() == "Windows":
-        logdir_first_part = "logs/scalars/"
-        time_folder_path = logdir_first_part + now_time
-        deeper_folder_path = time_folder_path + "/train"
-        deeper_folder_path2 = deeper_folder_path + "/plugins"
-        deeper_folder_path3 = deeper_folder_path2 + "/profile"
+        data_dir = RAW_DATA_DIR
+        image_count = len(list(data_dir.glob('*/*.jpg')))
 
-        def create_folder_if_not_exists(folder_name):
-            if not os.path.exists(folder_name):
-                os.makedirs(folder_name)
+        list_ds = tf.data.Dataset.list_files(str(data_dir / '*/*.jpg'))
 
-        create_folder_if_not_exists(time_folder_path)
-        create_folder_if_not_exists(deeper_folder_path)
-        create_folder_if_not_exists(deeper_folder_path2)
-        create_folder_if_not_exists(deeper_folder_path3)
+        # Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
+        labeled_ds = list_ds.map(process_path, num_parallel_calls=AUTOTUNE)
 
-    logdir = logdir_first_part + now_time
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
+        # print paths
+        for f in list_ds.take(5):
+            print(f.numpy())
 
-    model.fit(
-        train_ds,
-        steps_per_epoch=STEPS_PER_EPOCH,
-        epochs=NUMBER_OF_EPOCHS,
-        callbacks=[tensorboard_callback],
-        validation_data=test_ds,
-        validation_freq=10
-        )
+        # print labels
+        for image, label in labeled_ds.take(10):
+            print("Image shape: ", image.numpy().shape)
+            print("Label: ", label.numpy())
 
-    model.save(SAVED_MODEL_DIR + MODEL_NAME_TO_BE_SAVED + '.h5')
+        # load all images
+        all_ds = prepare_for_training(labeled_ds)
+        test_percentage = 0.2
+        # absolute nr of examples that are used for testing
+        n_test_examples = math.floor(test_percentage * image_count)
+        # how many batches should be considered in one epoch?
+        STEPS_PER_EPOCH = np.ceil((image_count - n_test_examples) / BATCH_SIZE)
+        # split in test and train dataset
+        test_ds = all_ds.take(n_test_examples)
+        train_ds = all_ds.skip(n_test_examples)
+
+        logdir_first_part = "./logs/scalars/"
+        now_time = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+        # fix very nasty Windows OS bug, that TF runs in,
+        # if those folders do not exist before TensorBoard tries to create them
+        if platform.system() == "Windows":
+            logdir_first_part = "logs/scalars/"
+            time_folder_path = logdir_first_part + now_time
+            deeper_folder_path = time_folder_path + "/train"
+            deeper_folder_path2 = deeper_folder_path + "/plugins"
+            deeper_folder_path3 = deeper_folder_path2 + "/profile"
+
+            def create_folder_if_not_exists(folder_name):
+                if not os.path.exists(folder_name):
+                    os.makedirs(folder_name)
+
+            create_folder_if_not_exists(time_folder_path)
+            create_folder_if_not_exists(deeper_folder_path)
+            create_folder_if_not_exists(deeper_folder_path2)
+            create_folder_if_not_exists(deeper_folder_path3)
+
+        logdir = logdir_first_part + now_time
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
+
+        model.fit(
+            train_ds,
+            steps_per_epoch=STEPS_PER_EPOCH,
+            epochs=NUMBER_OF_EPOCHS,
+            callbacks=[tensorboard_callback],
+            validation_data=test_ds,
+            validation_freq=VALIDATION_FREQ
+            )
+
+        model.save(SAVED_MODEL_DIR + MODEL_NAME_TO_BE_SAVED + '.h5')
+
 
 
 if __name__ == "__main__":

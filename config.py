@@ -23,6 +23,7 @@ img_width = 224
 batch_size = 64
 number_of_epochs = 100
 learning_rate = 1e-4
+validation_freq = 10
 
 
 # PARAMS TO CHOOSE CONTROL FLOW IN Main.py:
@@ -34,7 +35,7 @@ learning_rate = 1e-4
 # "cli"         := action is set via cli-argument instead, when starting Main.py.   Example:  Main.py train
 action = "cli"
 
-model_name = "Adam"
+model_name = "Adam_"
 model_name += datetime.now().strftime("%Y%m%d-%H%M%S")
 
 # Shall model be loaded or created?
