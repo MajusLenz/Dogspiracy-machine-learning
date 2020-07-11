@@ -41,7 +41,7 @@ model_name += datetime.now().strftime("%Y%m%d-%H%M%S")
 # Shall model be loaded or created?
 # False         := create new model instead of loading one
 # "MODELNAME"   := load model with this name instead of creating new one.  Example: model_name_to_be_loaded = "my_model"
-model_name_to_be_loaded = False
+model_name_to_be_loaded = "adam_flowers"
 
 # name of the model that gets saved. Careful: Existing model with this name will be overwritten!
 model_name_to_be_saved = model_name

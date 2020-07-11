@@ -128,11 +128,11 @@ def main():
         # Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
         labeled_ds = list_ds.map(process_path, num_parallel_calls=AUTOTUNE)
 
-        # print paths
+        # print some image paths
         for f in list_ds.take(5):
             print(f.numpy())
 
-        # print labels
+        # print some image shapes and labels
         for image, label in labeled_ds.take(10):
             print("Image shape: ", image.numpy().shape)
             print("Label: ", label.numpy())
@@ -183,6 +183,39 @@ def main():
 
         model.save(SAVED_MODEL_DIR + MODEL_NAME_TO_BE_SAVED + '.h5')
 
+    elif ACTION == "evaluate" or (ACTION == "cli" and cli_argument == "evaluate"):
+        print("start evaluating the model")
+
+        data_dir = VALIDATE_DATA_DIR
+        image_count = len(list(data_dir.glob('*/*.jpg')))
+
+        list_ds = tf.data.Dataset.list_files(str(data_dir / '*/*.jpg'))
+
+        # Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
+        labeled_ds = list_ds.map(process_path, num_parallel_calls=AUTOTUNE)
+
+        # load all images
+        validate_ds = prepare_for_training(labeled_ds)
+
+        results = model.evaluate(validate_ds, steps=image_count)
+        print("")
+        print("model_accuracy: " + str(results[1]))
+        print("loss: " + str(results[0]))
+
+    elif ACTION == "predict" or (ACTION == "cli" and cli_argument == "predict"):
+       pass
+
+
+
+    else:
+        # unknown action
+        if ACTION == "cli":
+            print(
+                "please set the action to be executed in this script via the cli-argument when executing this script.")
+            print("Example:  Main.py train")
+            print("Possible actions: 'train', 'evaluate', 'predict'. For more Information see config.py")
+        else:
+            print("unknown action! please set action to 'train', 'evaluate' or 'predict' in config.py")
 
 
 if __name__ == "__main__":
