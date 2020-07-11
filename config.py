@@ -1,7 +1,7 @@
 from datetime import datetime
 
 # directories where the data is located at
-stanford_dir = "data/stanford/images/"
+raw_dir = "data/flower_photos/images/"
 train_dir = "data/images/train/"
 test_dir = "data/images/test/"
 validate_dir = "data/images/test/"
@@ -13,8 +13,8 @@ saved_model_dir = "saved_model/"
 # this info comes from the dataset.
 # To ensure that every breed has the same number of images to train and to test,
 # this is set to the number of images of the breed with the fewest images.
-max_number_of_images_per_breed = 218
-max_number_of_train_images_per_breed = 185  # 85/15 Ratio
+max_number_of_images_per_breed = 633
+max_number_of_train_images_per_breed = 506  # 80/20 Ratio
 
 
 # LEARNING HYPER PARAMETERS:
