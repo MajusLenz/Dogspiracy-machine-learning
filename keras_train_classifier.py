@@ -27,6 +27,7 @@ def main():
 
     CLASS_NAMES = np.array([item.name for item in data_dir.glob('*') if item.name != "LICENSE.txt"])
     NUMBER_OF_CLASSES = len(CLASS_NAMES)
+    print("number of classes: "+str(NUMBER_OF_CLASSES))
 
     list_ds = tf.data.Dataset.list_files(str(data_dir/'*/*.jpg'))
     for f in list_ds.take(5):
@@ -119,9 +120,7 @@ def main():
         ])
 
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
-        loss=tf.keras.losses.SparseCategoricalCrossentropy(
-            from_logits=False, reduction="auto", name="sparse_categorical_crossentropy"
-            ),
+        loss=tf.keras.losses.SparseCategoricalCrossentropy(),
         metrics=["accuracy"])
 
     model.summary()
@@ -153,7 +152,7 @@ def main():
     model.fit(
         train_ds,
         steps_per_epoch=STEPS_PER_EPOCH,
-        epochs=NUMBER_OF_EPOCHS,
+        epochs=200,
         callbacks=[tensorboard_callback],
         validation_data=test_ds,
         validation_freq=10
