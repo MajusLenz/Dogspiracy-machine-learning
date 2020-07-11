@@ -67,12 +67,13 @@ print("count of usable GPUs: ")
 print(len(gpus))
 
 
-# convert file path to an (img, label) pair
 def get_label(file_path):
     # convert the path to a list of path components
     parts = tf.strings.split(file_path, os.path.sep)
     # The second to last is the class-directory
-    return parts[-2] == CLASS_NAMES
+    # bool_vec = parts[-2] == CLASS_NAMES
+    result = tf.where(parts[-2] == CLASS_NAMES)
+    return result
 
 
 def decode_img(img):
@@ -80,6 +81,8 @@ def decode_img(img):
     img = tf.image.decode_jpeg(img, channels=3)
     # Use `convert_image_dtype` to convert to floats in the [0,1] range.
     img = tf.image.convert_image_dtype(img, tf.float32)
+    # scale image between 0 and 1
+    img = img / 255.0
     # resize the image to the desired size.
     return tf.image.resize(img, [IMG_HEIGHT, IMG_WIDTH])
 
@@ -91,23 +94,14 @@ def process_path(file_path):
     img = decode_img(img)
     return img, this_label
 
-
-# augment data
-def convert(image, label):
-    image = tf.image.convert_image_dtype(image, tf.float32)  # Cast and normalize the image to [0,1]
-    return image, label
-
-
 def augment(image, label):
-    image, label = convert(image, label)
-    image = tf.image.convert_image_dtype(image, tf.float32)  # Cast and normalize the image to [0,1]
     image = tf.image.random_flip_left_right(image)  # Flip horizontally
-    image = tf.image.resize_with_crop_or_pad(image, 272, 272)  # Add 48 pixels of padding
-    image = tf.image.random_crop(image, size=[IMG_HEIGHT, IMG_WIDTH, 3])  # Random crop back to 224 x 224
-    image = tf.image.random_jpeg_quality(image, 80, 100)
-    image = tf.image.random_saturation(image, 0.8, 1.2)
-    image = tf.image.random_contrast(image, 0.8, 1.2)
-    image = tf.image.random_brightness(image, 0.2)  # Random brightness
+    # image = tf.image.resize_with_crop_or_pad(image, 272, 272)  # Add 48 pixels of padding
+    # image = tf.image.random_crop(image, size=[IMG_HEIGHT, IMG_WIDTH, 3])  # Random crop back to 224 x 224
+    # image = tf.image.random_jpeg_quality(image, 80, 100)
+    # image = tf.image.random_saturation(image, 0.8, 1.2)
+    # image = tf.image.random_contrast(image, 0.8, 1.2)
+    # image = tf.image.random_brightness(image, 0.2)  # Random brightness
     return image, label
 
 
@@ -119,7 +113,7 @@ def prepare_dataset(ds, shuffle=True, shuffle_buffer_size=1000, is_augment=False
 
     # call prepare_dataset with param is_augment=True for Training-Dataset
     # if is_augment:
-    # ds = ds.map(augment, num_parallel_calls=AUTOTUNE)
+        # ds = ds.map(augment, num_parallel_calls=AUTOTUNE)
 
     ds = ds.batch(BATCH_SIZE)
 
@@ -133,8 +127,8 @@ def prepare_dataset(ds, shuffle=True, shuffle_buffer_size=1000, is_augment=False
 num_parallel_calls_param = AUTOTUNE
 
 # fix nasty bug, that occurs in older Windows Version if you try to parallelly process multiple images
-if platform.system() == "Windows":
-    num_parallel_calls_param = None
+#if platform.system() == "Windows":
+#    num_parallel_calls_param = None
 
 if MODEL_NAME_TO_BE_LOADED:
     print("loading model " + MODEL_NAME_TO_BE_LOADED)
@@ -142,25 +136,53 @@ if MODEL_NAME_TO_BE_LOADED:
 
 else:
     print("creating new model")
+    '''
     model = Sequential([
-        Conv2D(filters=16, kernel_size=7, padding='same', activation='relu',
-               input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),  # add "input_shape" because this is the first layer of the Net
+        Conv2D(filters=32, kernel_size=7, padding='same', activation='relu',
+               input_shape=(IMG_HEIGHT, IMG_WIDTH, 3),
+               kernel_initializer="he_normal"),  # add "input_shape" because this is the first layer of the Net
+        MaxPooling2D(padding="same"),
+        Dropout(0.2),
+        Conv2D(64, 5, padding="same", activation="relu", kernel_initializer="he_normal"),
+        MaxPooling2D(padding="same"),
+        Dropout(0.2),
+        Conv2D(64, 3, padding="same", activation="relu", kernel_initializer="he_normal"),
+        MaxPooling2D(padding="same"),
+        Dropout(0.2),
+        Flatten(),  # transform 2D to 1D
+        Dense(512, activation='relu'),
+        Dropout(0.2),
+        Dense(NUMBER_OF_CLASSES, activation='softmax')
+    ])
+    '''
+
+    model = Sequential([
+        Conv2D(16, 5, padding="same", activation="relu",
+               input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
         MaxPooling2D(),
         Conv2D(32, 5, padding="same", activation="relu"),
         MaxPooling2D(),
-        Conv2D(64, 3, padding="same", activation="relu"),
+        Conv2D(32, 5, padding="same", activation="relu"),
         MaxPooling2D(),
-        Flatten(),  # transform 2D to 1D
-        Dense(512, activation='relu'),
-        Dropout(0.5),
-        Dense(NUMBER_OF_CLASSES, activation='softmax')
+        Conv2D(64, 5, padding="same", activation="relu"),
+        MaxPooling2D(),
+        Conv2D(64, 5, padding="same", activation="relu"),
+        MaxPooling2D(),
+        Flatten(),
+        Dense(512, activation="relu"),
+        Dense(NUMBER_OF_CLASSES, activation="softmax")
     ])
 
     # CategoricalCrossentropy: Computes the crossentropy loss between the labels and predictions.
     # Use this crossentropy loss function when there are two or more label classes.
     # We expect labels to be provided in a one_hot representation.
     # categorical_accuracy: Calculates how often predictions matches one-hot labels.
-
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
+                  loss=tf.keras.losses.SparseCategoricalCrossentropy(
+                      from_logits=False, reduction="auto", name="sparse_categorical_crossentropy"
+                  ),
+                  metrics=["accuracy"])
+    '''
     model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),
         loss=tf.keras.losses.CategoricalCrossentropy(
@@ -170,6 +192,12 @@ else:
             name="categorical_crossentropy",
         ),
         metrics=['categorical_accuracy', 'accuracy'])
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
+        loss=tf.keras.losses.CategoricalCrossentropy(),
+        metrics=['categorical_accuracy', 'accuracy'])
+     '''
+
 
 model.summary()
 
@@ -188,33 +216,6 @@ if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
 
     train_image_count = len(list(train_data_dir.glob('*/*.jpg')))
     test_image_count = len(list(test_data_dir.glob('*/*.jpg')))
-
-    # show label array of random image from the train dataset
-    '''
-    for image, label in train_labeled_ds.take(1):
-        print("Image shape: ", image.numpy().shape)
-        print("Label: ", label.numpy())
-    '''
-
-    # Plot example images:
-    '''
-    # set variables for plot (either train or test dataset)
-    image_batch, label_batch = next(iter(train_ds))
-    # image_batch, label_batch = next(iter(test_ds))
-
-    # define plots
-    def show_batch(image_batch, label_batch):
-        plt.figure(figsize=(15, 15))
-        for n in range(25):
-            ax = plt.subplot(5, 5, n + 1)
-            plt.imshow(image_batch[n])
-            plt.title(CLASS_NAMES[label_batch[n] == 1][0].title())
-            plt.axis('off')
-
-        return plt.show()
-
-    show_batch(image_batch, label_batch)
-    '''
 
     logdir_first_part = "./logs/scalars/"
     now_time = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -254,6 +255,11 @@ if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
         # images = np.reshape(dataset_array[0:25], (-1, 28, 28, 1))
         # tf.summary.image("25 training data examples", images, max_outputs=25, step=0)
 
+    # show label array of random image from the train dataset
+    for image, label in train_labeled_ds.take(1):
+        print("Image shape: ", image.numpy().shape)
+        print("Label: ", label.numpy())
+
     model.fit(
         train_ds,
         steps_per_epoch=STEPS_PER_EPOCH,
@@ -261,7 +267,8 @@ if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
         callbacks=[tensorboard_callback],
         validation_steps=val_steps,
         validation_data=test_ds,
-        validation_freq=1
+        validation_freq=5,
+        # shuffle=True
     )
 
     model.save(saved_model_dir + MODEL_NAME_TO_BE_SAVED + '.h5')
