@@ -34,7 +34,7 @@ validation_freq = 10
 # Shall model be trained, validated or shall a prediction be made
 # "train"       := train model and save it afterwards
 # "evaluate"    := evaluate model with validation data
-# "predict"     := predict classes of images in predict-folder
+# "predict"     := predict class of one image in predict_dir
 # "cli"         := action is set via cli-argument instead, when starting Main.py.   Example:  Main.py train
 action = "cli"
 

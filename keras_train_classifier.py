@@ -65,7 +65,7 @@ def main():
         img = decode_img(img)
         return img, label
 
-    def prepare_for_training(ds, cache=True, shuffle_buffer_size=1000):
+    def prepare_for_training(ds, cache=True, shuffle_buffer_size=1000, shuffle=True):
         # This is a small dataset, only load it once, and keep it in memory.
         # use `.cache(filename)` to cache preprocessing work for datasets that don't
         # fit in memory.
@@ -77,7 +77,8 @@ def main():
                 ds = ds.cache()
         '''
 
-        ds = ds.shuffle(buffer_size=shuffle_buffer_size)
+        if shuffle:
+            ds = ds.shuffle(buffer_size=shuffle_buffer_size)
 
         # Repeat forever
         ds = ds.repeat()
@@ -184,6 +185,7 @@ def main():
         logdir = logdir_first_part + now_time
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
 
+        # train
         model.fit(
             train_ds,
             steps_per_epoch=STEPS_PER_EPOCH,
@@ -209,15 +211,36 @@ def main():
         # load all images
         validate_ds = prepare_for_training(labeled_ds)
 
+        # evaluate
         results = model.evaluate(validate_ds, steps=image_count)
         print("")
         print("model_accuracy: " + str(results[1]))
         print("loss: " + str(results[0]))
 
     elif ACTION == "predict" or (ACTION == "cli" and cli_argument == "predict"):
-       pass
+        print("start prediction of one image")
 
+        data_dir = PREDICT_DATA_DIR
+        image_count = len(list(data_dir.glob('*.jpg')))
+        if image_count > 1:
+            print("you can only have one image in the predict directory. please remove the rest.")
 
+        list_ds = tf.data.Dataset.list_files(str(data_dir / '*.jpg'))
+
+        # Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
+        labeled_ds = list_ds.map(process_path, num_parallel_calls=AUTOTUNE)
+
+        # load all images
+        predict_ds = prepare_for_training(labeled_ds, shuffle=False)
+
+        # predict
+        results = model.predict(predict_ds, steps=image_count)
+        result = results[0]
+
+        max_prediction = max(result)
+        max_prediction_index = result.tolist().index(max_prediction)
+        predicted_class = CLASS_NAMES[max_prediction_index]
+        print("Class '" + predicted_class + "' was predicted")
 
     else:
         # unknown action
