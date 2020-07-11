@@ -21,7 +21,7 @@ max_number_of_train_images_per_breed = 506  # 80/20 Ratio
 img_height = 224
 img_width = 224
 batch_size = 64
-number_of_epochs = 200
+number_of_epochs = 100
 learning_rate = 0.001
 
 

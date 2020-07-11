@@ -67,6 +67,7 @@ print("count of usable GPUs: ")
 print(len(gpus))
 
 
+# convert file path to an (img, label) pair
 def get_label(file_path):
     # convert the path to a list of path components
     parts = tf.strings.split(file_path, os.path.sep)

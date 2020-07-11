@@ -11,20 +11,27 @@ from datetime import datetime
 
 
 def main():
-    # gpus = tf.config.experimental.list_physical_devices("GPU")
-    # if gpus:
-    #     try:
-    #         # Currently, memory growth needs to be the same across GPUs
-    #         for gpu in gpus:
-    #             tf.config.experimental.set_memory_growth(gpu, True)
-    #         logical_gpus = tf.config.experimental.list_logical_devices("GPU")
-    #         print(
-    #             len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
-    #     except RuntimeError as e:
-    #         # Memory growth must be set before GPUs have been initialized
-    #         print(e)
+    gpus = tf.config.experimental.list_physical_devices("GPU")
+    if gpus:
+        try:
+            # Currently, memory growth needs to be the same across GPUs
+            for gpu in gpus:
+                tf.config.experimental.set_memory_growth(gpu, True)
+            logical_gpus = tf.config.experimental.list_logical_devices("GPU")
+            print(
+                len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+        except RuntimeError as e:
+            # Memory growth must be set before GPUs have been initialized
+            print(e)
+
+    # data_dir = pathlib.Path(
+    #     "/media/mati3230/d8196a77-44d0-4208-a7d3-713df9c812f5/projects/test_keras/datasets/flower_photos")
+
+    import config as cfg
+    # data_dir = pathlib.Path(cfg.train_dir)
+
     data_dir = pathlib.Path(
-        "data/stanford/images/")
+        "data/flowers")
     image_count = len(list(data_dir.glob('*/*.jpg')))
 
     CLASS_NAMES = np.array([item.name for item in data_dir.glob('*') if item.name != "LICENSE.txt"])
@@ -107,7 +114,7 @@ def main():
 
     model = Sequential([
         Conv2D(16, 5, padding="same", activation="relu",
-            input_shape=(IMG_HEIGHT, IMG_WIDTH ,3)),
+            input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
         MaxPooling2D(),
         Conv2D(32, 5, padding="same", activation="relu"),
         MaxPooling2D(),
@@ -119,8 +126,8 @@ def main():
         MaxPooling2D(),
         Flatten(),
         Dense(512, activation="relu"),
-        Dense(7, activation="softmax")
-        ])
+        Dense(5, activation="softmax")
+    ])
 
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
         loss=tf.keras.losses.SparseCategoricalCrossentropy(
