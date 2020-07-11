@@ -1,11 +1,13 @@
 from datetime import datetime
 
 # directories where the data is located at
-raw_dir = "data/flowers/"
-train_dir = "data/images/train/"
-test_dir = "data/images/test/"
-validate_dir = "data/images/validate/"
-predict_dir = "data/images/predict/"
+data_location = "data/"
+dataset_name = "flowers"
+raw_dir = data_location + dataset_name
+train_dir = data_location + "images/train"
+test_dir = data_location + "images/test"
+validate_dir = data_location + "images/validate"
+predict_dir = data_location + "images/predict"
 
 # data directory where the model is saved to and loaded from
 saved_model_dir = "saved_model/"
@@ -18,6 +20,7 @@ max_number_of_train_images_per_breed = 506  # 80/20 Ratio
 
 
 # LEARNING HYPER PARAMETERS:
+optimizer = "adam"
 img_height = 224
 img_width = 224
 batch_size = 64
@@ -35,13 +38,12 @@ validation_freq = 10
 # "cli"         := action is set via cli-argument instead, when starting Main.py.   Example:  Main.py train
 action = "cli"
 
-model_name = "Adam_"
-model_name += datetime.now().strftime("%Y%m%d-%H%M%S")
+new_model_name = optimizer + "-" + dataset_name + "-" + datetime.now().strftime("%Y%m%d-%H%M%S")
 
 # Shall model be loaded or created?
 # False         := create new model instead of loading one
 # "MODELNAME"   := load model with this name instead of creating new one.  Example: model_name_to_be_loaded = "my_model"
-model_name_to_be_loaded = "adam_flowers"
+model_name_to_be_loaded = "adam_flowers_v1"
 
 # name of the model that gets saved. Careful: Existing model with this name will be overwritten!
-model_name_to_be_saved = model_name
+model_name_to_be_saved = new_model_name

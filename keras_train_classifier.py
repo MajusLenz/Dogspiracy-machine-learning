@@ -21,13 +21,14 @@ def main():
     NUMBER_OF_EPOCHS = cfg.number_of_epochs
     LEARNING_RATE = cfg.learning_rate
     VALIDATION_FREQ = cfg.validation_freq
+    OPTIMIZER = cfg.optimizer
+    RAW_DATA_DIR = pathlib.Path(cfg.raw_dir)
     VALIDATE_DATA_DIR = pathlib.Path(cfg.validate_dir)
     PREDICT_DATA_DIR = pathlib.Path(cfg.predict_dir)
     SAVED_MODEL_DIR = cfg.saved_model_dir
     MODEL_NAME_TO_BE_SAVED = cfg.model_name_to_be_saved
     MODEL_NAME_TO_BE_LOADED = cfg.model_name_to_be_loaded
     ACTION = cfg.action
-    RAW_DATA_DIR = pathlib.Path(cfg.raw_dir)
 
     # get CLI arguments
     cli_argument = None
@@ -111,7 +112,18 @@ def main():
             Dense(NUMBER_OF_CLASSES, activation="softmax")
             ])
 
-        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),
+        if OPTIMIZER == "adam":
+            optimizerInstance = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
+
+        elif OPTIMIZER == "XXXXX":
+            # TODO add other optimizer
+            pass
+
+        else:
+            print("unknown optimizer! Either choose 'adam' or 'XXXXX' as optimizer in config.py") # TODO add other optimizer
+            exit()
+
+        model.compile(optimizer=optimizerInstance,
             loss=tf.keras.losses.SparseCategoricalCrossentropy(),
             metrics=["accuracy"])
 
