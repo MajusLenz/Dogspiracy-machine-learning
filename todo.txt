@@ -1,7 +1,4 @@
-Dropout
-
-
-Bilder Ploten
+Dropout?
 
 
 RECHNEN lassen

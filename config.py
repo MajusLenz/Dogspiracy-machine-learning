@@ -22,7 +22,7 @@ img_height = 224
 img_width = 224
 batch_size = 64
 number_of_epochs = 100
-learning_rate = 0.001
+learning_rate = 1e-4
 
 
 # PARAMS TO CHOOSE CONTROL FLOW IN Main.py:
@@ -34,15 +34,13 @@ learning_rate = 0.001
 # "cli"         := action is set via cli-argument instead, when starting Main.py.   Example:  Main.py train
 action = "cli"
 
-
-model_name = "Adam_CategoricalCrossentropy_Conv7-16_Conv5-32_Conv3-64_Dense512_Dropout"
-model_name += "_IH" + str(img_height) + "_IW" + str(img_width) + "_BSize" + str(batch_size) + "_LR" + str(learning_rate)
+model_name = "Adam"
 model_name += datetime.now().strftime("%Y%m%d-%H%M%S")
 
 # Shall model be loaded or created?
 # False         := create new model instead of loading one
 # "MODELNAME"   := load model with this name instead of creating new one.  Example: model_name_to_be_loaded = "my_model"
-model_name_to_be_loaded = False # "Adam_CategoricalCrossentropy_Conv7-16_Conv5-32_Conv3-64_Dense512_Dropout_IH224_IW224_BSize32_LR0.00120200708-204419"
+model_name_to_be_loaded = False
 
 # name of the model that gets saved. Careful: Existing model with this name will be overwritten!
 model_name_to_be_saved = model_name

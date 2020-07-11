@@ -1,16 +1,16 @@
-import tensorflow as tf
-import pathlib
 import numpy as np
-AUTOTUNE = tf.data.experimental.AUTOTUNE
 import os
 import math
 import platform
+import pathlib
+from datetime import datetime
+import config as cfg
 
+import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Flatten, MaxPooling2D
-from datetime import datetime
+AUTOTUNE = tf.data.experimental.AUTOTUNE
 
-import config as cfg
 
 # get config parameters
 IMG_HEIGHT = cfg.img_height
@@ -18,11 +18,18 @@ IMG_WIDTH = cfg.img_width
 BATCH_SIZE = cfg.batch_size
 NUMBER_OF_EPOCHS = cfg.number_of_epochs
 LEARNING_RATE = cfg.learning_rate
+VALIDATE_DATA_DIR = pathlib.Path(cfg.validate_dir)
+PREDICT_DATA_DIR = pathlib.Path(cfg.predict_dir)
+SAVED_MODEL_DIR = cfg.saved_model_dir
 MODEL_NAME_TO_BE_SAVED = cfg.model_name_to_be_saved
+MODEL_NAME_TO_BE_LOADED = cfg.model_name_to_be_loaded
+ACTION = cfg.action
+RAW_DATA_DIR = pathlib.Path(cfg.raw_dir)
+
 
 def main():
-    data_dir = pathlib.Path(
-        "data/flowers/")
+
+    data_dir = RAW_DATA_DIR
     image_count = len(list(data_dir.glob('*/*.jpg')))
 
     CLASS_NAMES = np.array([item.name for item in data_dir.glob('*') if item.name != "LICENSE.txt"])
@@ -39,7 +46,6 @@ def main():
         # bool_vec = parts[-2] == CLASS_NAMES
         result = tf.where(parts[-2] == CLASS_NAMES)
         return result
-        #return parts[-2] == CLASS_NAMES
 
     def decode_img(img):
         # convert the compressed string to a 3D uint8 tensor
@@ -119,9 +125,7 @@ def main():
         ])
 
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
-        loss=tf.keras.losses.SparseCategoricalCrossentropy(
-            from_logits=False, reduction="auto", name="sparse_categorical_crossentropy"
-            ),
+        loss=tf.keras.losses.SparseCategoricalCrossentropy(),
         metrics=["accuracy"])
 
     model.summary()
@@ -159,7 +163,8 @@ def main():
         validation_freq=10
         )
 
-    model.save('saved_model/' + MODEL_NAME_TO_BE_SAVED + '.h5')
+    model.save(SAVED_MODEL_DIR + MODEL_NAME_TO_BE_SAVED + '.h5')
+
 
 if __name__ == "__main__":
     main()
