@@ -37,3 +37,36 @@ Please note: Only the "Images (757MB)" are required as the dataset!
 
 Once you downloaded the images, place them in the folder _data/stanford/images_ and run this file:
 [createTrainAndTestFoldersFromStanfordData.py](_createTrainAndTestFoldersFromStanfordData.py_)
+
+## Results
+### Model Summary
+![summary](assets/summary.PNG)
+### Training and Validation
+Adam Optimizer:
+- training: orange
+- validation: blue
+
+RSMProp Optimizer:
+- training: green
+- validation: grey
+
+Adam vs. RSMprop Optimizer: epoch accuracy
+
+![adam vs. rsmprop](assets/adam-vs-rsmprop.PNG)
+
+Adam Optimizer loss:
+
+![adam](assets/adam-loss.PNG)
+
+RSMprop Optimizer loss:
+
+![rsmprop](assets/rsmprop-loss.PNG)
+
+### Evaluation
+Adam Optimizer:
+accuracy: 79%
+loss: ??
+
+RSMProp Optimizer:
+accuracy: 69%
+loss: ??
