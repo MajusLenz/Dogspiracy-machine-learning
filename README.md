@@ -33,7 +33,7 @@ The model that shall be used & the learning hyper parameters can be changed in [
 
 The train data can be downloaded from https://drive.google.com/file/d/1rRVnOYOhCN6yUc6PmunTn3gxKCtl-MrA/view?usp=sharing
 
-Unzip it and move it to _data/dog-breeds_
+Unzip it and move it to the _data_ folder.
 
 The data is a mix of a part of the stanford dog breeds dataset (http://vision.stanford.edu/aditya86/ImageNetDogs/) and additional dog images from the google image search.
 
