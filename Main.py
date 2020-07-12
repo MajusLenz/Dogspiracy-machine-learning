@@ -277,7 +277,7 @@ if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
 elif ACTION == "evaluate" or (ACTION == "cli" and cli_argument == "evaluate"):
     print("start evaluating the model")
 
-    # create validation dataset from file paths
+    # create validate dataset from file paths
     validate_list_ds = tf.data.Dataset.list_files(str(validate_data_dir / '*/*.jpg'))
     validate_labeled_ds = validate_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
 
