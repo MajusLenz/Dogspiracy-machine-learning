@@ -60,12 +60,12 @@ To predict an other image, move it to this directory and delete the old image.
 ![summary](assets/summary.PNG)
 ### Training and Validation
 Adam Optimizer:
-- training: orange
-- validation: blue
+- training: grey
+- validation: orange
 
 RSMProp Optimizer:
-- training: green
-- validation: grey
+- training: pink
+- validation: green
 
 Adam vs. RSMprop Optimizer: epoch accuracy
 
@@ -82,12 +82,12 @@ RSMprop Optimizer loss:
 ### Evaluation
 Adam Optimizer:
 
-- model_accuracy: 0.7916667
+- model_accuracy: 0.8125
 
-- loss: 1.4469855806479852
+- loss: 1.5272420439869165
 
 RSMProp Optimizer:
 
-- model_accuracy: 0.6875
+- model_accuracy: 0.78125
 
-- loss: 1.5472476612776518
+- loss: 1.426356926560402
