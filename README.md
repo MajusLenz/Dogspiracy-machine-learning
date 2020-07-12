@@ -31,7 +31,7 @@ The model that shall be used & the learning hyper parameters can be changed in [
 
 ## Data Set
 
-The train data can be downloaded from _____________________________TODO
+The train data can be downloaded from https://drive.google.com/file/d/1rRVnOYOhCN6yUc6PmunTn3gxKCtl-MrA/view?usp=sharing
 
 Unzip it and move it to _data/dog-breeds_
 
