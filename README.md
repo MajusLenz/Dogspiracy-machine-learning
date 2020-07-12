@@ -41,12 +41,12 @@ First we tried to only use the full stanford dataset with 200 breed classes, but
 Therefore we took the 6 classes with the most images available and added extra images by hand using a google image search crawler.
 
 The train data now contains images of these 6 dog breeds:
-* Afghan hound (373 classes)
-* Bernese mountain dog (466 classes)
-* Irish wolfhound (302 classes)
-* Maltese dog (356 classes)
-* Pomeranian (475 classes)
-* Samoyed (306 classes)
+* Afghan hound (373 image)
+* Bernese mountain dog (466 image)
+* Irish wolfhound (302 image)
+* Maltese dog (356 image)
+* Pomeranian (475 image)
+* Samoyed (306 image)
 
 The evaluation data to check a model's performance contains 16 images for each class.
 It is located at _data/images/validate_ and is saved in this repository.
