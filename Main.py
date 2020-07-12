@@ -1,322 +1,257 @@
-# This script creates a model to classify dog-breeds from images or loads an existing model from the disk.
-# It then either trains the model via tensorflow, or evaluates the model's quality.
-# The performed action can be changed via config.py. (See: "PARAMS TO CHOOSE CONTROL FLOW IN Main.py")
 import sys
-from datetime import datetime
+import numpy as np
+import os
+import math
 import platform
+import pathlib
+from datetime import datetime
+import config as cfg
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D
-
-# tf.random.set_seed(1337)
+from tensorflow.keras.layers import Dense, Conv2D, Flatten, MaxPooling2D
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
-import numpy as np
-import matplotlib.pyplot as plt
-import os
-import pathlib
-import config as cfg
 
-# get config parameters
-saved_model_dir = cfg.saved_model_dir
-train_data_dir = cfg.train_dir
-test_data_dir = cfg.test_dir
-validate_data_dir = cfg.validate_dir
-predict_data_dir = cfg.predict_dir
-IMG_HEIGHT = cfg.img_height
-IMG_WIDTH = cfg.img_width
-BATCH_SIZE = cfg.batch_size
-NUMBER_OF_EPOCHS = cfg.number_of_epochs
-LEARNING_RATE = cfg.learning_rate
-MODEL_NAME_TO_BE_LOADED = cfg.model_name_to_be_loaded
-MODEL_NAME_TO_BE_SAVED = cfg.model_name_to_be_saved
-ACTION = cfg.action
+def main():
+    # get config parameters
+    IMG_HEIGHT = cfg.img_height
+    IMG_WIDTH = cfg.img_width
+    BATCH_SIZE = cfg.batch_size
+    NUMBER_OF_EPOCHS = cfg.number_of_epochs
+    LEARNING_RATE = cfg.learning_rate
+    VALIDATION_FREQ = cfg.validation_freq
+    OPTIMIZER = cfg.optimizer
+    RAW_DATA_DIR = pathlib.Path(cfg.raw_dir)
+    VALIDATE_DATA_DIR = pathlib.Path(cfg.validate_dir)
+    PREDICT_DATA_DIR = pathlib.Path(cfg.predict_dir)
+    SAVED_MODEL_DIR = cfg.saved_model_dir
+    MODEL_NAME_TO_BE_SAVED = cfg.model_name_to_be_saved
+    MODEL_NAME_TO_BE_LOADED = cfg.model_name_to_be_loaded
+    ACTION = cfg.action
 
-train_data_dir = pathlib.Path(train_data_dir)
-test_data_dir = pathlib.Path(test_data_dir)
-validate_data_dir = pathlib.Path(validate_data_dir)
-predict_data_dir = pathlib.Path(predict_data_dir)
+    # get CLI arguments
+    cli_argument = None
+    if len(sys.argv) > 1:
+        cli_argument = sys.argv[1]
 
-# get CLI arguments
-cli_argument = None
-if len(sys.argv) > 1:
-    cli_argument = sys.argv[1]
+    CLASS_NAMES = np.array([item.name for item in RAW_DATA_DIR.glob('*') if item.name != "LICENSE.txt"])
+    NUMBER_OF_CLASSES = len(CLASS_NAMES)
+    print("total classes: " + str(NUMBER_OF_CLASSES))
+    print('all class names: ', CLASS_NAMES)
 
-# get possible breed names
-CLASS_NAMES = np.array([item.name for item in test_data_dir.glob('*')])
-print('all breed names: ', CLASS_NAMES)
+    def get_label(file_path):
+        # convert the path to a list of path components
+        parts = tf.strings.split(file_path, os.path.sep)
+        # The second to last is the class-directory
+        # bool_vec = parts[-2] == CLASS_NAMES
+        result = tf.where(parts[-2] == CLASS_NAMES)
+        return result
 
-NUMBER_OF_CLASSES = len(CLASS_NAMES)
+    def decode_img(img):
+        # convert the compressed string to a 3D uint8 tensor
+        img = tf.image.decode_jpeg(img, channels=3)
+        # Use `convert_image_dtype` to convert to floats.
+        img = tf.image.convert_image_dtype(img, tf.float32)
+        # scale image between 0 and 1
+        img = img / 255.0
+        # resize the image to the desired size.
+        return tf.image.resize(img, [IMG_HEIGHT, IMG_WIDTH])
 
-# prepare GPUs
-gpus = tf.config.experimental.list_physical_devices("GPU")
-if gpus:
-    try:
-        # Currently, memory growth needs to be the same across GPUs
-        for gpu in gpus:
-            tf.config.experimental.set_memory_growth(gpu, True)
-        logical_gpus = tf.config.experimental.list_logical_devices("GPU")
-        print(
-            len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
-    except RuntimeError as e:
-        # Memory growth must be set before GPUs have been initialized
-        print(e)
+    def process_path(file_path):
+        label = get_label(file_path)
+        # load the raw data from the file as a string
+        img = tf.io.read_file(file_path)
+        img = decode_img(img)
+        return img, label
 
-print("count of usable GPUs: ")
-print(len(gpus))
+    def prepare_for_training(ds, cache=True, shuffle_buffer_size=1000, shuffle=True):
+        # This is a small dataset, only load it once, and keep it in memory.
+        # use `.cache(filename)` to cache preprocessing work for datasets that don't
+        # fit in memory.
+        '''
+        if cache:
+            if isinstance(cache, str):
+                ds = ds.cache(cache)
+            else:
+                ds = ds.cache()
+        '''
 
+        if shuffle:
+            ds = ds.shuffle(buffer_size=shuffle_buffer_size)
 
-# convert file path to an (img, label) pair
-def get_label(file_path):
-    # convert the path to a list of path components
-    parts = tf.strings.split(file_path, os.path.sep)
-    # The second to last is the class-directory
-    # bool_vec = parts[-2] == CLASS_NAMES
-    result = tf.where(parts[-2] == CLASS_NAMES)
-    return result
-
-
-def decode_img(img):
-    # convert the compressed string to a 3D uint8 tensor
-    img = tf.image.decode_jpeg(img, channels=3)
-    # Use `convert_image_dtype` to convert to floats in the [0,1] range.
-    img = tf.image.convert_image_dtype(img, tf.float32)
-    # scale image between 0 and 1
-    img = img / 255.0
-    # resize the image to the desired size.
-    return tf.image.resize(img, [IMG_HEIGHT, IMG_WIDTH])
-
-
-def process_path(file_path):
-    this_label = get_label(file_path)
-    # load the raw data from the file as a string
-    img = tf.io.read_file(file_path)
-    img = decode_img(img)
-    return img, this_label
-
-def augment(image, label):
-    image = tf.image.random_flip_left_right(image)  # Flip horizontally
-    # image = tf.image.resize_with_crop_or_pad(image, 272, 272)  # Add 48 pixels of padding
-    # image = tf.image.random_crop(image, size=[IMG_HEIGHT, IMG_WIDTH, 3])  # Random crop back to 224 x 224
-    # image = tf.image.random_jpeg_quality(image, 80, 100)
-    # image = tf.image.random_saturation(image, 0.8, 1.2)
-    # image = tf.image.random_contrast(image, 0.8, 1.2)
-    # image = tf.image.random_brightness(image, 0.2)  # Random brightness
-    return image, label
-
-
-def prepare_dataset(ds, shuffle=True, shuffle_buffer_size=1000, is_augment=False):
-    if shuffle:
-        ds = ds.shuffle(buffer_size=shuffle_buffer_size)
-        # re-initialize the dataset
+        # Repeat forever
         ds = ds.repeat()
 
-    # call prepare_dataset with param is_augment=True for Training-Dataset
-    # if is_augment:
-        # ds = ds.map(augment, num_parallel_calls=AUTOTUNE)
+        ds = ds.batch(BATCH_SIZE)
 
-    ds = ds.batch(BATCH_SIZE)
+        # `prefetch` lets the dataset fetch batches in the background while the model
+        # is training.
+        ds = ds.prefetch(buffer_size=AUTOTUNE)
 
-    # fetch batches in the background while the model is training
-    ds = ds.prefetch(buffer_size=AUTOTUNE)
+        return ds
 
-    return ds
+    if MODEL_NAME_TO_BE_LOADED:
+        print("loading model: " + MODEL_NAME_TO_BE_LOADED)
+        model = tf.keras.models.load_model(SAVED_MODEL_DIR + MODEL_NAME_TO_BE_LOADED + ".h5")
 
+    else:
+        model = Sequential([
+            Conv2D(16, 5, padding="same", activation="relu",
+                input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
+            MaxPooling2D(),
+            Conv2D(32, 5, padding="same", activation="relu"),
+            MaxPooling2D(),
+            Conv2D(32, 5, padding="same", activation="relu"),
+            MaxPooling2D(),
+            Conv2D(64, 5, padding="same", activation="relu"),
+            MaxPooling2D(),
+            Conv2D(64, 5, padding="same", activation="relu"),
+            MaxPooling2D(),
+            Flatten(),
+            Dense(512, activation="relu"),
+            Dense(NUMBER_OF_CLASSES, activation="softmax")
+            ])
 
-# Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
-num_parallel_calls_param = AUTOTUNE
+        if OPTIMIZER == "adam":
+            optimizerInstance = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
 
-# fix nasty bug, that occurs in older Windows Version if you try to parallelly process multiple images
-#if platform.system() == "Windows":
-#    num_parallel_calls_param = None
+        elif OPTIMIZER == "XXXXX":
+            # TODO add other optimizer
+            pass
 
-if MODEL_NAME_TO_BE_LOADED:
-    print("loading model " + MODEL_NAME_TO_BE_LOADED)
-    model = tf.keras.models.load_model(saved_model_dir + MODEL_NAME_TO_BE_LOADED + ".h5")
+        else:
+            print("unknown optimizer! Either choose 'adam' or 'XXXXX' as optimizer in config.py") # TODO add other optimizer
+            exit()
 
-else:
-    print("creating new model")
-    '''
-    model = Sequential([
-        Conv2D(filters=32, kernel_size=7, padding='same', activation='relu',
-               input_shape=(IMG_HEIGHT, IMG_WIDTH, 3),
-               kernel_initializer="he_normal"),  # add "input_shape" because this is the first layer of the Net
-        MaxPooling2D(padding="same"),
-        Dropout(0.2),
-        Conv2D(64, 5, padding="same", activation="relu", kernel_initializer="he_normal"),
-        MaxPooling2D(padding="same"),
-        Dropout(0.2),
-        Conv2D(64, 3, padding="same", activation="relu", kernel_initializer="he_normal"),
-        MaxPooling2D(padding="same"),
-        Dropout(0.2),
-        Flatten(),  # transform 2D to 1D
-        Dense(512, activation='relu'),
-        Dropout(0.2),
-        Dense(NUMBER_OF_CLASSES, activation='softmax')
-    ])
-    '''
+        model.compile(optimizer=optimizerInstance,
+            loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+            metrics=["accuracy"])
 
-    model = Sequential([
-        Conv2D(16, 5, padding="same", activation="relu",
-               input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
-        MaxPooling2D(),
-        Conv2D(32, 5, padding="same", activation="relu"),
-        MaxPooling2D(),
-        Conv2D(32, 5, padding="same", activation="relu"),
-        MaxPooling2D(),
-        Conv2D(64, 5, padding="same", activation="relu"),
-        MaxPooling2D(),
-        Conv2D(64, 5, padding="same", activation="relu"),
-        MaxPooling2D(),
-        Flatten(),
-        Dense(512, activation="relu"),
-        Dense(NUMBER_OF_CLASSES, activation="softmax")
-    ])
+    model.summary()
 
-    # CategoricalCrossentropy: Computes the crossentropy loss between the labels and predictions.
-    # Use this crossentropy loss function when there are two or more label classes.
-    # We expect labels to be provided in a one_hot representation.
-    # categorical_accuracy: Calculates how often predictions matches one-hot labels.
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
-                  loss=tf.keras.losses.SparseCategoricalCrossentropy(
-                      from_logits=False, reduction="auto", name="sparse_categorical_crossentropy"
-                  ),
-                  metrics=["accuracy"])
-    '''
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),
-        loss=tf.keras.losses.CategoricalCrossentropy(
-            from_logits=False,
-            label_smoothing=0,
-            reduction="auto",
-            name="categorical_crossentropy",
-        ),
-        metrics=['categorical_accuracy', 'accuracy'])
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
-        loss=tf.keras.losses.CategoricalCrossentropy(),
-        metrics=['categorical_accuracy', 'accuracy'])
-     '''
+    if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
+        print("start training the model")
 
+        data_dir = RAW_DATA_DIR
+        image_count = len(list(data_dir.glob('*/*.jpg')))
 
-model.summary()
+        list_ds = tf.data.Dataset.list_files(str(data_dir / '*/*.jpg'))
 
-if ACTION == "train" or (ACTION == "cli" and cli_argument == "train"):
-    print("start training the model")
+        # Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
+        labeled_ds = list_ds.map(process_path, num_parallel_calls=AUTOTUNE)
 
-    # create datasets from file paths
-    train_list_ds = tf.data.Dataset.list_files(str(train_data_dir / '*/*.jpg'))
-    test_list_ds = tf.data.Dataset.list_files(str(test_data_dir / '*/*.jpg'))
-    train_labeled_ds = train_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
-    test_labeled_ds = test_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
+        # print some image paths
+        for f in list_ds.take(5):
+            print(f.numpy())
 
-    # prepare dataset
-    train_ds = prepare_dataset(train_labeled_ds, is_augment=True)
-    test_ds = prepare_dataset(test_labeled_ds)
+        # print some image shapes and labels
+        for image, label in labeled_ds.take(10):
+            print("Image shape: ", image.numpy().shape)
+            print("Label: ", label.numpy())
 
-    train_image_count = len(list(train_data_dir.glob('*/*.jpg')))
-    test_image_count = len(list(test_data_dir.glob('*/*.jpg')))
+        # load all images
+        all_ds = prepare_for_training(labeled_ds)
+        test_percentage = 0.2
+        # absolute nr of examples that are used for testing
+        n_test_examples = math.floor(test_percentage * image_count)
+        # how many batches should be considered in one epoch?
+        STEPS_PER_EPOCH = np.ceil((image_count - n_test_examples) / BATCH_SIZE)
+        # split in test and train dataset
+        test_ds = all_ds.take(n_test_examples)
+        train_ds = all_ds.skip(n_test_examples)
 
-    logdir_first_part = "./logs/scalars/"
-    now_time = datetime.now().strftime("%Y%m%d-%H%M%S")
+        logdir_first_part = "./logs/scalars/"
+        now_time = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-    # fix very nasty Windows 8 bug, that TF runs in, if those folders do not exist before TensorBoard tries to create them
-    if platform.system() == "Windows":
-        logdir_first_part = "logs/scalars/"
-        time_folder_path = logdir_first_part + now_time
-        deeper_folder_path = time_folder_path + "/train"
-        deeper_folder_path2 = deeper_folder_path + "/plugins"
-        deeper_folder_path3 = deeper_folder_path2 + "/profile"
+        # fix very nasty Windows OS bug, that TF runs in,
+        # if those folders do not exist before TensorBoard tries to create them
+        if platform.system() == "Windows":
+            logdir_first_part = "logs/scalars/"
+            time_folder_path = logdir_first_part + now_time
+            deeper_folder_path = time_folder_path + "/train"
+            deeper_folder_path2 = deeper_folder_path + "/plugins"
+            deeper_folder_path3 = deeper_folder_path2 + "/profile"
 
-        def create_folder_if_not_exists(folder_name):
-            if not os.path.exists(folder_name):
-                os.makedirs(folder_name)
+            def create_folder_if_not_exists(folder_name):
+                if not os.path.exists(folder_name):
+                    os.makedirs(folder_name)
 
-        create_folder_if_not_exists(time_folder_path)
-        create_folder_if_not_exists(deeper_folder_path)
-        create_folder_if_not_exists(deeper_folder_path2)
-        create_folder_if_not_exists(deeper_folder_path3)
+            create_folder_if_not_exists(time_folder_path)
+            create_folder_if_not_exists(deeper_folder_path)
+            create_folder_if_not_exists(deeper_folder_path2)
+            create_folder_if_not_exists(deeper_folder_path3)
 
-    logdir = logdir_first_part + now_time
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
+        logdir = logdir_first_part + now_time
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
 
-    STEPS_PER_EPOCH = np.ceil(train_image_count / BATCH_SIZE)
-    val_steps = np.ceil(test_image_count / BATCH_SIZE)
+        # train
+        model.fit(
+            train_ds,
+            steps_per_epoch=STEPS_PER_EPOCH,
+            epochs=NUMBER_OF_EPOCHS,
+            callbacks=[tensorboard_callback],
+            validation_data=test_ds,
+            validation_freq=VALIDATION_FREQ
+            )
 
-    # image plotting in tensorboard
-    # Sets up a timestamped log directory.
-    # logdir = "logs/train_data/" + datetime.now().strftime("%Y%m%d-%H%M%S")
-    # Creates a file writer for the log directory.
-    # file_writer = tf.summary.create_file_writer(logdir)
+        model.save(SAVED_MODEL_DIR + MODEL_NAME_TO_BE_SAVED + '.h5')
 
-    # with file_writer.as_default():
-        # Don't forget to reshape.
-        # dataset_array = list(train_ds.as_numpy_iterator())
-        # images = np.reshape(dataset_array[0:25], (-1, 28, 28, 1))
-        # tf.summary.image("25 training data examples", images, max_outputs=25, step=0)
+    elif ACTION == "evaluate" or (ACTION == "cli" and cli_argument == "evaluate"):
+        print("start evaluating the model")
 
-    # show label array of random image from the train dataset
-    for image, label in train_labeled_ds.take(1):
-        print("Image shape: ", image.numpy().shape)
-        print("Label: ", label.numpy())
+        data_dir = VALIDATE_DATA_DIR
+        image_count = len(list(data_dir.glob('*/*.jpg')))
 
-    model.fit(
-        train_ds,
-        steps_per_epoch=STEPS_PER_EPOCH,
-        epochs=NUMBER_OF_EPOCHS,
-        callbacks=[tensorboard_callback],
-        validation_steps=val_steps,
-        validation_data=test_ds,
-        validation_freq=5,
-        # shuffle=True
-    )
+        list_ds = tf.data.Dataset.list_files(str(data_dir / '*/*.jpg'))
 
-    model.save(saved_model_dir + MODEL_NAME_TO_BE_SAVED + '.h5')
+        # Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
+        labeled_ds = list_ds.map(process_path, num_parallel_calls=AUTOTUNE)
 
-elif ACTION == "evaluate" or (ACTION == "cli" and cli_argument == "evaluate"):
-    print("start evaluating the model")
+        # load all images
+        validate_ds = prepare_for_training(labeled_ds)
 
-    # create validate dataset from file paths
-    validate_list_ds = tf.data.Dataset.list_files(str(validate_data_dir / '*/*.jpg'))
-    validate_labeled_ds = validate_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
+        # evaluate
+        results = model.evaluate(validate_ds, steps=image_count)
+        print("")
+        print("model_accuracy: " + str(results[1]))
+        print("loss: " + str(results[0]))
 
-    # prepare dataset
-    validate_ds = prepare_dataset(validate_labeled_ds)
+    elif ACTION == "predict" or (ACTION == "cli" and cli_argument == "predict"):
+        print("start prediction of one image")
 
-    results = model.evaluate(validate_ds, steps=500)
-    print("")
-    print("model_accuracy: " + str(results[1]))
-    print("loss: " + str(results[0]))
+        data_dir = PREDICT_DATA_DIR
+        image_count = len(list(data_dir.glob('*.jpg')))
+        if image_count > 1:
+            print("you can only have one image in the predict directory. please remove the rest.")
 
-elif ACTION == "predict" or (ACTION == "cli" and cli_argument == "predict"):
-    print("start prediction")
+        list_ds = tf.data.Dataset.list_files(str(data_dir / '*.jpg'))
 
-    # create predict dataset from file paths
-    predict_list_ds = tf.data.Dataset.list_files(str(predict_data_dir / '*.jpg'))
-    predict_ds = predict_list_ds.map(process_path, num_parallel_calls=num_parallel_calls_param)
+        # Set `num_parallel_calls` so multiple images are loaded/processed in parallel.
+        labeled_ds = list_ds.map(process_path, num_parallel_calls=AUTOTUNE)
 
-    # prepare dataset
-    predict_ds = prepare_dataset(predict_ds, shuffle=False)
+        # load all images
+        predict_ds = prepare_for_training(labeled_ds, shuffle=False)
 
-    _, _, files = next(os.walk(str(predict_data_dir)))
-    number_of_images = len(files)
+        # predict
+        results = model.predict(predict_ds, steps=image_count)
+        result = results[0]
 
-    results = model.predict(predict_ds, steps=number_of_images)
-
-    for result_index, result in enumerate(results):
         max_prediction = max(result)
         max_prediction_index = result.tolist().index(max_prediction)
         predicted_class = CLASS_NAMES[max_prediction_index]
+        print("Class '" + predicted_class + "' was predicted")
 
-        image_name = files[result_index]
-        print("Class '" + predicted_class + "' was predicted for image " + image_name)
-
-else:
-    # unknown action
-    if ACTION == "cli":
-        print("please set the action to be executed in this script via the cli-argument when executing this script.")
-        print("Example:  Main.py train")
-        print("Possible actions: 'train', 'evaluate', 'predict'. For more Information see config.py")
     else:
-        print("unknown action! please set action to 'train', 'evaluate' or 'predict' in config.py")
+        # unknown action
+        if ACTION == "cli":
+            print(
+                "please set the action to be executed in this script via the cli-argument when executing this script.")
+            print("Example:  Main.py train")
+            print("Possible actions: 'train', 'evaluate', 'predict'. For more Information see config.py")
+        else:
+            print("unknown action! please set action to 'train', 'evaluate' or 'predict' in config.py")
+
+
+if __name__ == "__main__":
+    main()

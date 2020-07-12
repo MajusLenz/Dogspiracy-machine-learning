@@ -4,20 +4,11 @@ from datetime import datetime
 data_location = "data/"
 dataset_name = "flowers"
 raw_dir = data_location + dataset_name
-train_dir = data_location + "images/train"
-test_dir = data_location + "images/test"
 validate_dir = data_location + "images/validate"
 predict_dir = data_location + "images/predict"
 
 # data directory where the model is saved to and loaded from
 saved_model_dir = "saved_model/"
-
-# this info comes from the dataset.
-# To ensure that every breed has the same number of images to train and to test,
-# this is set to the number of images of the breed with the fewest images.
-max_number_of_images_per_breed = 633
-max_number_of_train_images_per_breed = 506  # 80/20 Ratio
-
 
 # LEARNING HYPER PARAMETERS:
 optimizer = "adam"
