@@ -1,4 +1,0 @@
-cropping, resizing, noising and rotation ?
-
-
-GPU nutzen?
