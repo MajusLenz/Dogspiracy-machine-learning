@@ -11,11 +11,11 @@ predict_dir = data_location + "images/predict"
 saved_model_dir = "saved_model/"
 
 # LEARNING HYPER PARAMETERS:
-optimizer = "adam"
+optimizer = "rsmprop"
 img_height = 224
 img_width = 224
 batch_size = 64
-number_of_epochs = 100
+number_of_epochs = 120
 learning_rate = 1e-4
 validation_freq = 10
 
@@ -34,7 +34,7 @@ new_model_name = optimizer + "-" + dataset_name + "-" + datetime.now().strftime(
 # Shall model be loaded or created?
 # False         := create new model instead of loading one
 # "MODELNAME"   := load model with this name instead of creating new one.  Example: model_name_to_be_loaded = "my_model"
-model_name_to_be_loaded = "rmsprop-dog-breeds-20200712-190754" #"adam-dog-breeds-20200712-174314" # rmsprop-dog-breeds-20200712-190754
+model_name_to_be_loaded = "rsmprop-dog-breeds-20200712-214402" #"adam-dog-breeds-20200712-174314" # rmsprop-dog-breeds-20200712-190754
 
 # name of the model that gets saved. Careful: Existing model with this name will be overwritten!
 model_name_to_be_saved = new_model_name
