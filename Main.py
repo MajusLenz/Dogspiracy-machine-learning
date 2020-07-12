@@ -9,7 +9,7 @@ import config as cfg
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv2D, Flatten, MaxPooling2D
+from tensorflow.keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 
@@ -65,18 +65,7 @@ def main():
         img = decode_img(img)
         return img, label
 
-    def prepare_for_training(ds, cache=True, shuffle_buffer_size=1000, shuffle=True):
-        # This is a small dataset, only load it once, and keep it in memory.
-        # use `.cache(filename)` to cache preprocessing work for datasets that don't
-        # fit in memory.
-        '''
-        if cache:
-            if isinstance(cache, str):
-                ds = ds.cache(cache)
-            else:
-                ds = ds.cache()
-        '''
-
+    def prepare_for_training(ds, shuffle_buffer_size=1000, shuffle=True):
         if shuffle:
             ds = ds.shuffle(buffer_size=shuffle_buffer_size)
 
@@ -110,18 +99,17 @@ def main():
             MaxPooling2D(),
             Flatten(),
             Dense(512, activation="relu"),
+            Dropout(0.2),
             Dense(NUMBER_OF_CLASSES, activation="softmax")
             ])
 
         if OPTIMIZER == "adam":
             optimizerInstance = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
 
-        elif OPTIMIZER == "XXXXX":
-            # TODO add other optimizer
-            pass
-
+        elif OPTIMIZER == "rsmprop":
+            optimizerInstance = tf.keras.optimizers.RMSprop(learning_rate=LEARNING_RATE)
         else:
-            print("unknown optimizer! Either choose 'adam' or 'XXXXX' as optimizer in config.py") # TODO add other optimizer
+            print("unknown optimizer! Either choose 'adam' or 'rsmprop' as optimizer in config.py")
             exit()
 
         model.compile(optimizer=optimizerInstance,

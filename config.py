@@ -2,7 +2,7 @@ from datetime import datetime
 
 # directories where the data is located at
 data_location = "data/"
-dataset_name = "flowers"
+dataset_name = "dog-breeds"
 raw_dir = data_location + dataset_name
 validate_dir = data_location + "images/validate"
 predict_dir = data_location + "images/predict"
@@ -34,7 +34,7 @@ new_model_name = optimizer + "-" + dataset_name + "-" + datetime.now().strftime(
 # Shall model be loaded or created?
 # False         := create new model instead of loading one
 # "MODELNAME"   := load model with this name instead of creating new one.  Example: model_name_to_be_loaded = "my_model"
-model_name_to_be_loaded = "adam_flowers_v1"
+model_name_to_be_loaded = "rmsprop-dog-breeds-20200712-190754" #"adam-dog-breeds-20200712-174314" # rmsprop-dog-breeds-20200712-190754
 
 # name of the model that gets saved. Careful: Existing model with this name will be overwritten!
 model_name_to_be_saved = new_model_name

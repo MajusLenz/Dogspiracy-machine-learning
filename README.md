@@ -81,9 +81,13 @@ RSMprop Optimizer loss:
 
 ### Evaluation
 Adam Optimizer:
-accuracy: 79%
-loss: ??
+
+- model_accuracy: 0.7916667
+
+- loss: 1.4469855806479852
 
 RSMProp Optimizer:
-accuracy: 69%
-loss: ??
+
+- model_accuracy: 0.6875
+
+- loss: 1.5472476612776518
