@@ -130,4 +130,16 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+/data/images/
+/data/kaggle/images/
+/data/stanford/images/
+/data/images/
+/data/images/test/
+/data/images/train/
+/data/flower_photos/
+/data/flower_photos_few/
+/data/flower_photos_few/
+/saved_model/my_model/
+/data/flowers/
+/data/stanford/
 
