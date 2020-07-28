@@ -142,4 +142,5 @@ dmypy.json
 /saved_model/my_model/
 /data/flowers/
 /data/stanford/
+/data/dog-breeds/*
 
