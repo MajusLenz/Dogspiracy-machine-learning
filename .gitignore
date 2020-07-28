@@ -143,4 +143,6 @@ dmypy.json
 /data/flowers/
 /data/stanford/
 /data/dog-breeds/*
+data/stanford_rest/
+
 
